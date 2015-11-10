@@ -90,6 +90,10 @@ var getTaskList = function(obj, partment, name) {
 		var personObj = analyze(person, obj);
 		infos.push(personObj);
 	});
+	partment['产品部'].forEach(function(person) {
+		var personObj = analyze(person, obj);
+		infos.push(personObj);
+	});
 	return sortTasks(infos);
 }
 

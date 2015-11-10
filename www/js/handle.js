@@ -2,6 +2,7 @@ $(function() {
 	var partment,
 		time,
 		res,
+		res1,
 		priorityName = {
 			0: '普通',
 			1: '紧急',
@@ -22,8 +23,8 @@ $(function() {
 	// var servers=[{"name": "s16", "ip": "120.55.75.27:9001"}];
 	var servers = [{
 		"name": "s16",
-		// "ip": "192.168.1.64"
-		"ip": "127.0.0.1"
+		"ip": "192.168.1.64"
+			// "ip": "127.0.0.1"
 	}];
 
 	var baozObject;
@@ -105,7 +106,8 @@ $(function() {
 
 	function checkAll() {
 		var lines = $('table').find('tr'),
-			len = lines.length;
+			len = lines.length,
+			d = new Date();
 		for (var i = 1; i < len; i++) {
 			lines.eq(i).removeClass('warn');
 			var j = Number(i) - 1;
@@ -116,9 +118,27 @@ $(function() {
 				if (new Date().getTime() - new Date(due).getTime() > 1000 * 60 * 60 * 24) lines.eq(i).addClass('warn');
 			}
 
-			if (!res[j].comment.comment || new Date().getTime() - new Date(res[j].comment.comment.created).getTime() > 1000 * 60 * 60 * 24) {
-				$('#td' + j + '').addClass('warn2');
+			if ($('#td' + j + '').find('td').eq(2).html() == '未平定' && satgestate.indexOf(res[j].stage) !== -1) {
+				$('#td' + j + '').find('td').eq(2).addClass('warn1');
 			}
+
+			if (d.getHours() == 17 && d.getMinutes() > 30) {
+				if (!res[j].comment.comment || new Date().getTime() - new Date(res[j].comment.comment.created).getTime() > 1000 * 60 * 60 * 24) {
+					$('#td' + j + '').addClass('warn2');
+				}
+			}
+			if (d.getHours() > 19 && d.getHours() < 21) {
+				clearAll();
+			}
+		}
+	}
+
+	function clearAll() {
+		var lines = $('table').find('tr'),
+			len = lines.length;
+		for (var i = 1; i < len; i++) {
+
+			lines.eq(i).removeClass('warn2');
 		}
 	}
 
@@ -148,6 +168,8 @@ $(function() {
 			if (check.indexOf(priorityName[res[task].priority]) != -1) $('#td' + task + '').show();
 			else $('#td' + task + '').hide();
 		}
+
+
 		checkAll();
 	}
 
@@ -253,8 +275,6 @@ $(function() {
 	getP();
 	getTime();
 	getTask();
-
-
 	setInterval(getTask, 1000 * 60 * 10);
 
 	setInterval(getTime, 1000 * 60 * 10);
