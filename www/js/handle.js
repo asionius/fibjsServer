@@ -9,7 +9,8 @@ $(function() {
 		},
 		n = 0,
 		satgestate = ['需求确认', '解决方案', '开发', '测试版', '预览版', '正式版'],
-		P;
+		P,
+		house = false;
 
 	function tojson(v) {
 		var json;
@@ -102,6 +103,25 @@ $(function() {
 		})
 	}
 
+	function checkAll() {
+		var lines = $('table').find('tr'),
+			len = lines.length;
+		for (var i = 1; i < len; i++) {
+			lines.eq(i).removeClass('warn');
+			var j = Number(i) - 1;
+			$('#td' + j + '').removeClass('warn2');
+
+			var due = $('#td' + j + '').find('td').eq(3).html();
+			if (due) {
+				if (new Date().getTime() - new Date(due).getTime() > 1000 * 60 * 60 * 24) lines.eq(i).addClass('warn');
+			}
+
+			if (!res[j].comment.comment || new Date().getTime() - new Date(res[j].comment.comment.created).getTime() > 1000 * 60 * 60 * 24) {
+				$('#td' + j + '').addClass('warn2');
+			}
+		}
+	}
+
 	function getTask() {
 		$.ajax({
 			type: "GET",
@@ -128,6 +148,7 @@ $(function() {
 			if (check.indexOf(priorityName[res[task].priority]) != -1) $('#td' + task + '').show();
 			else $('#td' + task + '').hide();
 		}
+		checkAll();
 	}
 
 	function clickStage() {
@@ -170,9 +191,15 @@ $(function() {
 
 	function fillTable() {
 		$('#table').empty();
-		$('#table').append('<tr id="thead"style="color:blue;"><td class="index">编号</td><td>任务名称</td><td class="p" title="p级*工期">p级*工期</td><td class="due">截止日期</td><td class="executor">执行人</td><td class="project">所属项目</td><td class="confirmquestion" value="需求确认" title="需求确认">需求</td><td class="solution" value="解决方案" title="解决方案">解决案</td><td class="product" value="开发">开发</td><td class="test" value="测试版">测试版</td><td class="preview" value="预览版">预览版</td><td class="result" value="正式版">正式版</td><td class="stage" value="其它阶段">所有阶段</td><td class="score">评分</td><td class="pause">暂停备注</td></tr>');
+		$('#table').append('<tr id="thead"style="color:blue;"><td class="index">编号</td><td>任务名称</td><td class="p" title="p级*工期">p级*工期</td><td class="due">截止日期</td><td class="pause">暂停备注</td><td class="executor">执行人</td><td class="project">所属项目</td><td class="confirmquestion" value="需求确认" title="需求确认">需求</td><td class="solution" value="解决方案" title="解决方案">解决案</td><td class="product" value="开发">开发</td><td class="test" value="测试版">测试版</td><td class="preview" value="预览版">预览版</td><td class="result" value="正式版">正式版</td><td class="score">评分</td></tr>');
 		for (var task in res) {
-			$('#table').append("<tr id='td" + task + "' class='white'></tr>");
+			if (house) {
+				$('#table').append("<tr id='td" + task + "' style='background-color: #F5F5F5;'></tr>");
+
+			} else {
+				$('#table').append("<tr id='td" + task + "' ></tr>");
+			}
+			house = !house;
 			var index = Number(task) + 1;
 			var priority = priorityName[res[task].priority];
 			$('#td' + task + '').append("<td class='index'>" + index + "</td>");
@@ -195,32 +222,40 @@ $(function() {
 			// if (checkdue) {
 			// 	if (new Date().getTime() - checkdue.getTime() < 1000 * 60 * 60 * 12) sendemail(res[task]);
 			// }
-			dueDate = dueDate ? new Date(dueDate).format('yyyy-MM-dd hh:mm:ss') : '';
+			dueDate = dueDate ? new Date(dueDate).format('yyyy-MM-dd') : '';
 			$('#td' + task + '').append("<td title=" + dueDate + ">" + dueDate + "</td>");
-			$('#td' + task + '').append("<td class='executor'>" + res[task].executor + "</td>");
-			$('#td' + task + '').append("<td class='project' title=" + res[task].project + ">" + res[task].project + "</td>");
-			var confirmquestion = ('需求确认' == res[task].stage) ? '√' : '',
-				solution = ('解决方案' == res[task].stage) ? '√' : '',
-				product = ('开发' == res[task].stage) ? '√' : '',
-				test = ('测试版' == res[task].stage) ? '√' : '',
-				preview = ('预览版' == res[task].stage) ? '√' : '',
-				result = ('正式版' == res[task].stage) ? '√' : '';
-			$('#td' + task + '').append("<td class='confirmquestion'>" + confirmquestion + "</td>");
-			$('#td' + task + '').append("<td class='solution'>" + solution + "</td>");
-			$('#td' + task + '').append("<td class='product'>" + product + "</td>");
-			$('#td' + task + '').append("<td class='test'>" + test + "</td>");
-			$('#td' + task + '').append("<td class='preview'>" + preview + "</td>");
-			$('#td' + task + '').append("<td class='result'>" + result + "</td>");
-			$('#td' + task + '').append("<td class='stage'>" + res[task].stage + "</td>");
-			$('#td' + task + '').append("<td>" + score + "</td>");
 			$('#td' + task + '').append("<td id='pause" + task + "'></td>");
 			$('#pause' + task + '').text(pause);
+			$('#td' + task + '').append("<td class='executor'>" + res[task].executor + "</td>");
+			$('#td' + task + '').append("<td class='project' title=" + res[task].project + ">" + res[task].project + "</td>");
+			if (satgestate.indexOf(res[task].stage) == -1) {
+				$('#td' + task + '').append("<td class='stage' colspan='6'>" + res[task].stage + "</td>");
+			} else {
+				var confirmquestion = ('需求确认' == res[task].stage) ? '√' : '',
+					solution = ('解决方案' == res[task].stage) ? '√' : '',
+					product = ('开发' == res[task].stage) ? '√' : '',
+					test = ('测试版' == res[task].stage) ? '√' : '',
+					preview = ('预览版' == res[task].stage) ? '√' : '',
+					result = ('正式版' == res[task].stage) ? '√' : '';
+				$('#td' + task + '').append("<td class='confirmquestion'>" + confirmquestion + "</td>");
+				$('#td' + task + '').append("<td class='solution'>" + solution + "</td>");
+				$('#td' + task + '').append("<td class='product'>" + product + "</td>");
+				$('#td' + task + '').append("<td class='test'>" + test + "</td>");
+				$('#td' + task + '').append("<td class='preview'>" + preview + "</td>");
+				$('#td' + task + '').append("<td class='result'>" + result + "</td>");
+			}
+
+			$('#td' + task + '').append("<td>" + score + "</td>");
+
 		}
 		clickPriority();
 	}
 	getP();
 	getTime();
 	getTask();
+
+
 	setInterval(getTask, 1000 * 60 * 10);
+
 	setInterval(getTime, 1000 * 60 * 10);
 });

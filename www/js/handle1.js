@@ -97,6 +97,19 @@ $(function() {
 		});
 	}
 
+	function checkDate() {
+		var lines = $('table').find('tr'),
+			len = lines.length;
+		for (var i = 1; i < len; i++) {
+			lines.eq(i).removeClass('warn');
+			var j = Number(i) - 1;
+			var due = $('#td' + j + '').find('td').eq(3).html();
+			if (due) {
+				if (new Date().getTime() - new Date(due).getTime() > 1000 * 60 * 60 * 24) lines.eq(i).addClass('warn');
+			}
+		}
+	}
+
 	function getTask() {
 		$.ajax({
 			type: "GET",
@@ -164,7 +177,6 @@ $(function() {
 				$('#td' + task + '').show();
 			}
 		}
-
 	}
 
 	function fillTable() {

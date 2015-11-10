@@ -1,0 +1,970 @@
+<!doctype html>
+<html lang="en">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<head>
+    <script type="text/javascript" src="http://cdn.hcharts.cn/jquery/jquery-1.8.3.min.js"></script>
+    <script type="text/javascript" src="http://cdn.hcharts.cn/highcharts/highcharts.js"></script>
+    <!-- <script type="text/javascript" src="http://cdn.hcharts.cn/highcharts/exporting.js"></script>  -->
+    <script type="text/javascript" scr="http://cdn.hcharts.cn/highcharts/themes/skies.js"></script>
+    <script type="text/javascript" src="http://cdn.hcharts.cn/highcharts/highcharts-more.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            Highcharts.setOptions({
+                global: {
+                    useUTC: false
+                }
+            });
+            var last_time,
+                    now = new Date(),
+                    year = now.getFullYear(),
+                    month = now.getMonth(),
+                    date = now.getDate(),
+                    hour = now.getHours(),
+                    minute = now.getMinutes();
+            var maxtime = new Date(year, month, date, hour, minute).getTime() - 5 * 60 * 1000,
+                    mintime = new Date(year, month, date - 1, hour, minute).getTime() - 5 * 60 * 1000;
+
+            function hanget(t) {
+                return t.replace(/\./g, '');
+            }
+
+            var serverip = ["all", "10.135.30.89", "10.165.5.21"];
+            var hosts = {
+                "10.135.30.89": "   [s1]",
+                "10.165.5.21": "   [s10]",
+                "all": "   [all]"
+            }
+            serverip.forEach(function (all) {
+                function createHtml(t) {
+                    t = hanget(t);
+                    var h = [];
+                    var a=all
+                    h.push('<div class="dev_chart"  style="display: none;" id ="' + t + '">');
+                    h.push('<div id="container-time1-' + t + '" style="min-width:600px;min-height:400px;float: left"></div>');
+                    h.push('<div id="container-pv-' + t + '" style="min-width:600px;min-height:400px;float: left"></div>  ');
+                    h.push('<div id="container-time-' + t + '" style="min-width:600px;min-height:400px;float: left"></div> ');
+                    h.push('<div id="container-time2-' + t + '" style="min-width:600px;min-height:400px;float: left"></div> ');
+                    h.push('</div>');
+                    return h.join("");
+
+                }
+
+                function initRequest(key, duration, statdate, enddate) {
+                    xmlhttp = null;
+                    var res = [];
+                    if (window.XMLHttpRequest) { // code for IE7, Firefox, Opera, etc.
+                        xmlhttp = new XMLHttpRequest();
+                    } else if (window.ActiveXObject) { // code for IE6, IE5
+                        xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+                    }
+                    if (xmlhttp != null) {
+                        var url = "http://xhr.i.named.cn/xhr/%E7%BB%9F%E8%AE%A1%E5%90%8E%E5%8F%B0.stat"
+                        xmlhttp.open("POST", url, false);
+                        xmlhttp.setRequestHeader("Cookie", "sessionid=aa372477-b696-4ecd-a09c-219e9c2f4e3c; sessionpid=aa372477-b696-4ecd-a09c-219e9c2f4e3c");
+                        xmlhttp.setRequestHeader("Content-Type", "application/json");
+                        key
+                        var data = {
+                            "method": "search",
+                            "params": [{
+                                "type": key,
+                                "host": key === "client-mean-runtime" ? "all" : all,
+                                "surl": " ",
+                                "duration": duration,
+                                "start_time": statdate,
+                                "end_time": enddate,
+                                "rtype": ""
+                            }]
+                        };
+
+                        var r = xmlhttp.send(JSON.stringify(data));
+                        return JSON.parse(xmlhttp.responseText).result.list;
+                    }
+                    return [];
+                }
+
+                var total = [];
+
+                function initDate() {
+                    var hours = [];
+                    var minutes = [];
+
+                    for (var i = 0; i < 24; i++) {
+                        i = (i < 10) ? "0" + i.toString() : i.toString();
+                        hours.push(i);
+                    }
+
+                    for (var j = 0; j < 60; j++) {
+                        if (j % 1 === 0) {
+                            var key = (j < 10) ? "0" + j.toString() : j.toString();
+                            if (minutes.indexOf(key) === -1) minutes.push(key);
+                        }
+
+                    }
+
+                    hours.forEach(function (hour) {
+                        minutes.forEach(function (minute) {
+                            total.push(hour + ':' + minute);
+                        });
+                    });
+
+                }
+
+                initDate();
+
+                function getsth(k, d) {
+                    var now = new Date();
+                    if (!last_time) {
+                        last_time = new Date(now.getTime() - 10 * 60 * 1000);
+                    }
+                    if (now.getTime() - last_time.getTime() > 24 * 3600 * 1000) {
+                        var start_now = new Date(now.getTime() - 24 * 3600 * 1000 - 10 * 60 * 1000),
+                                start = start_now.getFullYear() + "-" + (Number(start_now.getMonth()) + 1) + "-" + start_now.getDate() + " " + start_now.getHours() + ":" + start_now.getMinutes();
+                    } else {
+                        start = last_time.getFullYear() + "-" + (Number(last_time.getMonth()) + 1) + "-" + last_time.getDate() + " " + last_time.getHours() + ":" + last_time.getMinutes();
+                    }
+                    var end_now = new Date(now.getTime() - 5 * 60 * 1000);
+                    end = end_now.getFullYear() + "-" + (Number(end_now.getMonth()) + 1) + "-" + end_now.getDate() + " " + end_now.getHours() + ":" + end_now.getMinutes();
+                    return initRequest(k, d, start, end);
+                }
+
+                function getall(k, d) {
+                    var now = new Date(),
+                            start_now = new Date(now.getTime() - 24 * 3600 * 1000 - 5 * 60 * 1000);
+                    var start = start_now.getFullYear() + "-" + (Number(start_now.getMonth()) + 1) + "-" + start_now.getDate() + " " + start_now.getHours() + ":" + start_now.getMinutes();
+                    var end_now = new Date(now.getTime() - 5 * 60 * 1000);
+                    var end = end_now.getFullYear() + "-" + (Number(end_now.getMonth()) + 1) + "-" + end_now.getDate() + " " + end_now.getHours() + ":" + end_now.getMinutes();
+                    return initRequest(k, d, start, end);
+                }
+
+                function loadDate(list) {
+                    var date = [];
+                    for (var i = 0; i < list.length; i++) {
+                        var time = new Date(list[i].date);
+                        var d = time.getHours() + ":" + time.getMinutes() + ":00";
+                        date.push(d);
+                    }
+                    return date;
+                }
+
+                function loadValue(list) {
+                    var value = [];
+                    var today = new Date(),
+                            st = new Date(today.getFullYear() + "-" + (Number(today.getMonth()) + 1) + "-" + today.getDate() + " 00:00").getTime();
+                    for (var j = 0; j < list.length; j++) {
+                        var now = new Date(list[j].date).getTime();
+                        var pl = (now - st) / (60 * 1000);
+                        value[pl] = list[j].value;
+                    }
+                    return value;
+                }
+
+                var listmean = getsth("log-server-pv_mean_", "1min"),
+                        listPv = getsth("log-server-pv_count_", "1min"),
+                        listmintime = getsth("log-server-pv_mintime_", "1min"),
+                        listmaxtime = getsth("log-server-pv_maxtime_", "1min"),
+                        listallmean = getall("log-server-pv_mean_", "1min"),
+                        listallPv = getall("log-server-pv_count_", "1min"),
+                        listallmintime = getall("log-server-pv_mintime_", "1min"),
+                        listallmaxtime = getall("log-server-pv_maxtime_", "1min"),
+                        listclient = getsth("client-mean-runtime", "1min"),
+                        listallclient = getall("client-mean-runtime", "1min");
+
+                var data_value = [listmean, listmintime, listmaxtime, listallmean, listallmintime, listallmaxtime, listclient, listallclient];
+                for (var i = 0; i < 6; i++) {
+                    data_value[i].forEach(function (k) {
+                        k["value"] = (k["value"] > 300) ? k["value"] = 300 : k["value"]
+                    });
+                }
+                                for (var i = 6; i < 8; i++) {
+                    data_value[i].forEach(function (k) {
+                        k["value"] = (k["value"] > 1000) ? k["value"] = 1000 : k["value"]
+                    });
+                }
+                ;
+                var ranges = [],
+                        pv = [],
+                        averages = [],
+                        client = [],
+                        clientall= [];
+                for (var i in listPv) {
+                    var d = [];
+                    var time = new Date(listPv[i].date);
+                    d = [time.getTime(), listPv[i].value / 60];
+                    pv.push(d);
+                }
+                for (var i in listmean) {
+                    var d = [];
+                    var time = new Date(listmean[i].date);
+                    d = [time.getTime(), listmean[i].value];
+                    averages.push(d);
+                }
+
+                for (i in listmintime) {
+                    var d = [];
+                    var time = new Date(listmintime[i].date);
+                    d = [time.getTime(), listmintime[i].value, listmaxtime[i].value];
+                    ranges.push(d);
+                }
+                for (var i in listclient) {
+                    var d = [];
+                    var time = new Date(listclient[i].date);
+                    d = [time.getTime(), listclient[i].value];
+                    client.push(d);
+                }
+
+                   for (var i in listallclient) {
+                    var d = [];
+                    var time = new Date(listallclient[i].date);
+                    d = [time.getTime(), listallclient[i].value];
+                    clientall.push(d);
+
+                }
+
+                if (!pv[mintime]) {
+                    var ranges = [],
+                            pv = [],
+                            averages = [];
+                    for (var i in listallPv) {
+                        var d = [];
+                        var time = new Date(listallPv[i].date);
+                        d = [time.getTime(), listallPv[i].value / 60];
+                        pv.push(d);
+                    }
+                    for (var i in listallmean) {
+                        var d = [];
+                        var time = new Date(listallmean[i].date);
+                        d = [time.getTime(), listallmean[i].value];
+                        averages.push(d);
+                    }
+                    for (i in listallmintime) {
+                        var d = [];
+                        var time = new Date(listallmintime[i].date);
+                        d = [time.getTime(), listallmintime[i].value, listallmaxtime[i].value];
+                        ranges.push(d);
+                    }
+                    // for (i in averages) {
+                    //  ranges[i] = [];
+                    //  ranges[i][0] = averages[i][0];
+                    //  ranges[i][1] = averages[i][1] - Math.floor(Math.random() * 400);
+                    //  ranges[i][2] = averages[i][1] + Math.floor(Math.random() * 400);
+                    // }
+                }
+
+                var $html = $(createHtml(all));
+                $("#list").append($html);
+
+                $html.find('#container-time-' + hanget(all)).highcharts({
+                    chart: {
+                        renderTo: 'container-time-' + hanget(all),
+                        type: 'spline',
+                        events: {
+                            load: function () {
+                                var series1 = this.series[0]; //全站平局响应时间
+                                setInterval(function () {
+                                    var listmean = getsth("log-server-pv_mean_", "1min");
+                                    if (listmean.length) {
+                                        var time = new Date(listmean[listmean.length - 1].date),
+                                                x = time.getTime(),
+                                                y1 = listmean[listmean.length - 1].value > 300 ? 300 : listmean[listmean.length - 1].value;
+                                        series1.addPoint([x, y1], true, true);
+                                    }
+                                }, 60 * 1000);
+                            }
+                        }
+                    },
+                    title: {
+                        text: '全站平均响应时间' + hosts[all]
+                    },
+                    labels: {
+                        style: {
+                            color: Highcharts.getOptions().colors[2]
+                        },
+                        items: [{
+                            html: '版本：V1.0；修改时间：2015-7-28；',
+                            style: {
+                                left: 'min-width:10px',
+                                top: '315px',
+                                fontSize: '10px',
+                                fontWeight: 'bold',
+                                fontFamily: '微软雅黑'
+                            }
+                        }]
+                    },
+                    credits: {
+                        text: 'named.cn',
+                        href: 'http://named.cn',
+                        position: { // 位置设置
+                            align: 'right',
+                            x: -20,
+                            verticalAlign: 'bottom',
+                            y: -30
+                        },
+                        style: { // 样式设置
+                            cursor: 'pointer',
+                            color: 'red',
+                            fontSize: '20px'
+                        }
+                    },
+                    xAxis: {
+                        type: 'datetime',
+                        dateTimeLabelFormats: {
+                            minute: '%H:%M',
+                        },
+                        // max: maxtime,
+                        // min: mintime,
+                        // ordinal: false,
+                        // tickPosition: 'inside', //刻度线位于x轴的内部
+                        tickPixelInterval: 50, //设置横坐标密度
+                        gridLineWidth: 1
+                    },
+                    yAxis: [{
+                        labels: {
+                            formatter: function () {
+                                return this.value + 'ms';
+                            },
+                            style: {
+                                color: Highcharts.getOptions().colors[3]
+                            }
+                        },
+                        floor: 0,
+                        startOnTick: false,
+                        title: {
+                            text: '全站平均响应时间',
+                            style: {
+                                color: Highcharts.getOptions().colors[3]
+                            }
+                        },
+                        plotLines: [{
+                            value: 50,
+                            color: 'red',
+                            dashStyle: 'shortdash',
+                            width: 2,
+                            label: {
+                                text: '上限值'
+                            }
+                        }]
+                    }],
+                    tooltip: {
+                        crosshairs: true,
+                        shared: true,
+                    },
+                    legend: {},
+                    series: [{
+                        name: '全站平均响应时间',
+                        color: Highcharts.getOptions().colors[3],
+                        data: averages,
+                        zIndex: 1,
+                        marker: {
+                            enabled: false
+                        }
+                    }]
+                });
+                $html.find('#container-time1-' + hanget(all)).highcharts({
+                    chart: {
+                        renderTo: 'container-time1-' + hanget(all),
+                        type: 'spline',
+                        events: {
+                            load: function () {
+                                var series1 = this.series[0]; //全站平局响应时间
+                                var series2 = this.series[1]; //响应时间上下限
+                                setInterval(function () {
+                                    var listmean = getsth("log-server-pv_mean_", "1min"),
+                                            listmintime = getsth("log-server-pv_mintime_", "1min"),
+                                            listmaxtime = getsth("log-server-pv_maxtime_", "1min");
+                                    if (listmean.length) {
+                                        var time = new Date(listmean[listmean.length - 1].date),
+                                                x = time.getTime(),
+                                                y1 = listmean[listmean.length - 1].value > 300 ? 300 : listmean[listmean.length - 1].value,
+                                                y21 = listmintime[listmintime.length - 1].value > 300 ? 300 : listmintime[listmintime.length - 1].value,
+                                                y22 = listmaxtime[listmaxtime.length - 1].value > 300 ? 300 : listmaxtime[listmaxtime.length - 1].value;
+                                        series1.addPoint([x, y1], true, true);
+                                        series2.addPoint([x, y21, y22], true, true);
+                                    }
+                                }, 60 * 1000);
+                            }
+                        }
+                    },
+                    title: {
+                        text: '全站平均响应时间' + hosts[all]
+                    },
+                    labels: {
+                        style: {
+                            color: Highcharts.getOptions().colors[2]
+                        },
+                    },
+                    credits: {
+                        text: null
+                    },
+                    xAxis: {
+                        type: 'datetime',
+                        dateTimeLabelFormats: {
+                            minute: '%H:%M',
+                        },
+                        // max: maxtime,
+                        // min: mintime,
+                        // ordinal: false,
+                        // tickPosition: 'inside', //刻度线位于x轴的内部
+                        tickPixelInterval: 50, //设置横坐标密度
+                        gridLineWidth: 1
+                    },
+                    yAxis: [{
+                        labels: {
+                            formatter: function () {
+                                return this.value + 'ms';
+                            },
+                            style: {
+                                color: Highcharts.getOptions().colors[3]
+                            }
+                        },
+                        floor: 0,
+                        startOnTick: false,
+                        title: {
+                            text: '全站平均响应时间',
+                            style: {
+                                color: Highcharts.getOptions().colors[3]
+                            }
+                        },
+                        plotLines: [{
+                            value: 50,
+                            color: 'red',
+                            dashStyle: 'shortdash',
+                            width: 2,
+                            label: {
+                                text: '上限值'
+                            }
+                        }]
+                    }],
+                    tooltip: {
+                        crosshairs: true,
+                        shared: true,
+                    },
+                    legend: {},
+                    series: [{
+                        name: '全站平均响应时间',
+                        color: Highcharts.getOptions().colors[3],
+                        data: averages,
+                        zIndex: 1,
+                        marker: {
+                            enabled: false
+                        }
+                    }, {
+                        name: 'Range',
+                        data: ranges,
+                        type: 'arearange',
+                        lineWidth: 0,
+                        linkedTo: ':previous',
+                        // color: Highcharts.getOptions().colors[2],
+                        fillOpacity: 0.4,
+                        zIndex: 0
+
+                    }]
+                });
+                $html.find('#container-pv-' + hanget(all)).highcharts({
+                    chart: {
+                        renderTo: 'container-pv-' + hanget(all),
+                        type: 'spline',
+                        events: {
+                            load: function () {
+                                var series = this.series[0]; //全站Pv
+                                setInterval(function () {
+                                    var listPv = getsth("log-server-pv_count_", "1min");
+                                    if (listPv.length) {
+                                        last_time = new Date(listPv[listPv.length - 1].date),
+                                                x = last_time.getTime(),
+                                                y0 = listPv[listPv.length - 1].value / 60;
+                                        series.addPoint([x, y0], true, true);
+                                    }
+                                }, 60 * 1000);
+                            }
+                        }
+                    },
+                    title: {
+                        text: 'QPS' + hosts[all]
+                    },
+                    credits: {
+                        text: null
+                    },
+                    xAxis: {
+                        type: 'datetime',
+                        dateTimeLabelFormats: {
+                            minute: '%H:%M',
+                        },
+                        tickPixelInterval: 50, //设置横坐标密度
+                        gridLineWidth: 1
+                    },
+                    yAxis: [{
+                        labels: {
+                            formatter: function () {
+                                return this.value;
+                            },
+                            style: {
+                                color: Highcharts.getOptions().colors[0]
+                            }
+                        },
+                        floor: 0,
+                        startOnTick: false,
+                        title: {
+                            text: 'QPS',
+                            style: {
+                                color: Highcharts.getOptions().colors[0]
+                            }
+                        }
+                    }],
+
+                    tooltip: {
+                        crosshairs: true,
+                        shared: true,
+                    },
+                    legend: {},
+                    series: [{
+                        name: 'QPS',
+                        // color: '#4572A7',
+                        data: pv,
+                        zIndex: 1,
+                        marker: {
+                            enabled: false
+                        }
+                    }]
+                });
+
+                $html.find('#container-time2-' + hanget(all)).highcharts({
+                    chart: {
+                        renderTo: 'container-time2-' + hanget(all),
+                        type: 'spline',
+                        events: {
+                            load: function () {
+                                var series3 = this.series[0]; //全站平局响应时间
+
+                                setInterval(function () {
+                                    var listmean = getsth("client-mean-runtime_", "1min");
+                                    if (listmean.length) {
+                                        var time = new Date(listmean[listmean.length - 1].date),
+                                                x = time.getTime(),                                               
+                                                y1 = listmean[listmean.length - 1].value > 300 ? 300 : listmean[listmean.length - 1].value;
+                                        series3.addPoint([x, y1], true, true);
+                                    }
+                                }, 60 * 1000);
+                            }
+                        }
+                    },
+                    title: {
+                        text: 'client平均响应时间' + hosts["all"]
+                    },
+                    credits: {
+                        text: 'named.cn',
+                        href: 'http://named.cn',
+                        position: { // 位置设置
+                            align: 'right',
+                            x: -20,
+                            verticalAlign: 'bottom',
+                            y: -30
+                        },
+                        style: { // 样式设置
+                            cursor: 'pointer',
+                            color: 'red',
+                            fontSize: '20px'
+                        }
+                    },
+                    xAxis: {
+                        type: 'datetime',
+                        dateTimeLabelFormats: {
+                            minute: '%H:%M',
+                        },
+                        // max: maxtime,
+                        // min: mintime,
+                        // ordinal: false,
+                        // tickPosition: 'inside', //刻度线位于x轴的内部
+                        tickPixelInterval: 50, //设置横坐标密度
+                        gridLineWidth: 1
+                    },
+                    yAxis: [{
+                        labels: {
+                            formatter: function () {
+                                return this.value + 'ms';
+                            },
+                            style: {
+                                color: Highcharts.getOptions().colors[3]
+                            }
+                        },
+                        floor: 0,
+                        startOnTick: false,
+                        title: {
+                            text: 'client平均响应时间',
+                            style: {
+                                color: Highcharts.getOptions().colors[3]
+                            }
+                        },
+                        plotLines: [{
+                            value: 50,
+                            color: 'red',
+                            dashStyle: 'shortdash',
+                            width: 2,
+                            label: {
+                                text: '上限值'
+                            }
+                        }]
+                    }],
+                    tooltip: {
+                        crosshairs: true,
+                        shared: true,
+                    },
+                    legend: {},
+                    series: [{
+                        name: 'client平均响应时间',
+                        color: Highcharts.getOptions().colors[3],
+                        data: clientall,
+                        zIndex: 1,
+                        marker: {
+                            enabled: false
+                        }
+                    }]
+                });
+            });
+
+
+            $("#" + hanget(serverip[0])).show();
+
+            var count = 0;
+            var cindex = 0;
+            var isAllShow = true;
+            var nowid = 0;
+            var len = serverip.length;
+
+            setInterval(function () {
+                if (!isAllShow) {
+                    $("#" + hanget(serverip[nowid])).hide();
+                    $("#" + hanget(serverip[0])).show();
+                    isAllShow = true;
+                } else {
+                    $("#" + hanget(serverip[0])).hide();
+                    isAllShow = false;
+                    if (nowid) {
+                        nowid = nowid + 1;
+                    } else {
+                        nowid = 1;
+                    }
+
+                    nowid = nowid >= len ? 1 : nowid;
+                    $("#" + hanget(serverip[nowid])).show();
+                }
+            }, 30 * 1000)
+
+
+        });
+    </script>
+
+<style type="text/css">
+        * {
+            margin: 0px;
+            padding: 0px;
+        }
+
+        body {
+            font-size: 15px;
+            text-align: center;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        ul, li {
+            list-style: none;
+        }
+
+        a {
+            text-decoration: none;
+            color: #3381BF;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        #movie_rank {
+            height: 100%;
+            background: #171A19;
+            color: #fff;
+        }
+
+        #movie_rank .title {
+            text-align: left;
+            padding: 20px 10px;
+            border-bottom: 1px solid #525d59;
+            margin-bottom: 10px;
+        }
+
+        #movie_rank .rank_list li {
+            line-height: 30px;
+            padding: 5px;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: left;
+            border-bottom: 1px solid #222;
+        }
+
+        #movie_rank .rank_list .rank {
+            width: 30px;
+            height: 30px;
+            margin-right: 20px;
+            margin-left: 20px;
+            text-align: center;
+            color: #1EC5A4;
+            background: #000;
+            display: inline-block;
+        }
+
+        #movie_rank .rank_list li:nth-child(1) .rank {
+            color: #f0bd69;
+            font-size: 20px;
+            border: 1px solid #f0bd69;
+        }
+
+        #movie_rank .rank_list li:nth-child(2) .rank {
+            color: #6bf060;
+            border: 1px solid #6bf060;
+        }
+
+        #movie_rank .rank_list li:nth-child(3) .rank {
+            color: #f0798b;
+            border: 1px solid #f0798b;
+        }
+
+        #movie_rank .rank_list .name {
+            display: inline-block;
+            width: 120px;
+            color: #ddd;
+        }
+
+        #movie_rank .rank_list .kpi {
+            color: #ccc;
+        }
+
+        #movie_rank .rank_list li.warning .rank,
+        #movie_rank .rank_list li.warning .name,
+        #movie_rank .rank_list li.warning .kpi {
+            color: red;
+        }
+
+    </style>
+    <script type="text/javascript">
+        function tojson(v) {
+            var json;
+            new Function("define", v)(function (val) {
+                json = val;
+            });
+            return json;
+        }
+    var kpiDays = {
+            0: 22,
+            1: 22,
+            2: 22,
+            3: 22,
+            4: 22,
+            5: 22,
+            6: 22,
+            7: 22,
+            8: 22,
+            9: 18,
+            10: 21,
+            11: 23
+        };
+    var relation = {
+        0 : [0, 65],
+        50: [65, 75],
+        75: [75, 85],
+        90: [85, 95],
+        100: [95, 105],
+        110: [105, 115],
+        125: [115, 125],
+        145: [125, 135],
+        170: [135, 145],
+        200: [145, 1000]
+    }
+    var showLeaveWorkdays = function() {
+        var time = new Date();
+
+        function getLastDays(time) {
+            var month = time.getMonth();
+            var i = 1;
+            for (;; i++) {
+                if (month != new Date(time.getTime() + i * 1000 * 60 * 60 * 24).getMonth()) {
+                    return i;
+                }
+            }
+        }
+
+        function getWorkdays(time) {
+            var days = getLastDays(time);
+            var workdays = 0;
+            for (var i = 0; i < days; i++) {
+                if (new Date(time.getTime() + i * 1000 * 3600 * 24).getDay() < 6 && new Date(time.getTime() + i * 1000 * 3600 * 24).getDay() > 0) {
+                    workdays++;
+                }
+            }
+            return workdays;
+        }
+        var workdays = getWorkdays(time);
+        return workdays;
+    }
+    Date.prototype.format =function(format)
+{
+var o = {
+"M+" : this.getMonth()+1, //month
+"d+" : this.getDate(), //day
+"h+" : this.getHours(), //hour
+"m+" : this.getMinutes(), //minute
+"s+" : this.getSeconds(), //second
+"q+" : Math.floor((this.getMonth()+3)/3), //quarter
+"S" : this.getMilliseconds() //millisecond
+}
+if(/(y+)/.test(format)) format=format.replace(RegExp.$1,
+(this.getFullYear()+"").substr(4- RegExp.$1.length));
+for(var k in o)if(new RegExp("("+ k +")").test(format))
+format = format.replace(RegExp.$1,
+RegExp.$1.length==1? o[k] :
+("00"+ o[k]).substr((""+ o[k]).length));
+return format;
+}
+    
+        function getStaffPerformance() {
+            var today = new Date();
+            var currentTime = today.toString();
+            $('#refreshdate').html(today.format('yyyy-MM-dd hh:mm:ss'));
+
+            var alDay = kpiDays[today.getMonth()] - showLeaveWorkdays() + ((today.getDay() < 7&&today.getDay() > 0) ? 1 : 0);
+            $('#workdate').html(alDay)
+            var part = "技术部";
+            var evalueDays = kpiDays[new Date().getMonth()];
+            var res;
+            var tag = 1;
+            if (part == '----请选择部门----') {
+                alert('请选择部门');
+                return;
+            }
+            if (evalueDays == '请输入本月考核天数' || !Number(evalueDays)) {
+                alert('请输入本月考核天数, 且天数为整数');
+                return;
+            }
+            $.ajax({
+                type: "GET",
+                url: "http://192.168.1.64/teambition/performance/" + part,
+                async: false,
+                timeout: 1000 * 60,
+                dataType: "text",
+                success: function (result) {
+                    res = tojson(result);
+                },
+                error: function (result) {
+                    console.error(result);
+                }
+            })
+            if (part == '技术部') {
+                $('#table3').empty();
+                $('#table3').append('<tr id=head><td>排名</td><td>姓名</td><td>绩效得分</td></tr>');
+            } else if (part == '产品部') {
+                $('#table4').empty();
+                $('#table4').append('<tr id=head><td>排名</td><td>姓名</td><td>绩效得分</td></tr>');
+                tag = 2;
+            }
+            var sorts = [];
+            $('#u1').empty();
+            res.infos.forEach(function (personObj) {
+                var pf = 0;
+                for (var task in personObj['tasks']) {
+                    if (personObj['tasks'][task].isEnd == 'true') {
+                        var set_note = personObj['tasks'][task].comment.set_note;
+                        var note = set_note ? (set_note.note ? set_note.note.split('\r\n') : '') : '';
+                        var month = note ? (note[0] ? note[0] : 0) : 0;
+                        var pJ = note ? (note[1] ? note[1] : 0) : 0;
+                        var score = note ? (note[2] ? note[2] : 0) : 0;
+                        var pause = note ? (note[3] ? note[3] : 0) : 0;
+                    } else continue;
+                    if (month && pJ && score) {
+            if(/\d+月/.test(month) === false) {
+                continue;
+            }
+            if(new Date().getMonth() + 1 !== Number(month.split('月')[0])) {
+                continue;
+            }
+                        if (/^p\d+\*\d*\.*\d+[hd]$/.test(pJ) === false) {
+                            // alert(personObj.person + ' : 备忘中任务p级和日期写在第二行，格式为pn*m[d|h] 其中n、m代表整数数字, d代表天,h代表小时, 不许出现小数');
+                            continue;
+                        }
+                        var ppd = pJ.split('*');
+                        var tpj = Number(ppd[0].split('p')[1]);
+                        var wds = ppd[1];
+                        // console.error(wds);
+                        if (!wds) continue;
+                        if (wds.indexOf('h') !== -1) {
+                            var a = wds.split('h')[0];
+
+                            wds = Number(wds.split('h')[0]) / 8;
+                        } else if (wds.indexOf('d') !== -1) {
+                            var a = wds.split('d')[0];
+                            wds = Number(a);
+                        } else {
+                            wds = Number(wds);
+                        }
+                        if(!res.P[personObj.person]) return;
+                        var pj = res.P[personObj.person].P;
+                        if (!pj) {
+                            // alert(personObj.person + ' : 备忘中月份顶行写， 示例：10月, 并完善员工p级信息');
+                            continue;
+                        }
+                        score = Number(score);
+                        pf += score * wds * Math.pow(2, tpj - pj)
+                    } else {
+                        continue;
+                    }
+                }
+                if (res.P[personObj.person]) {
+                    pf = (pf / (evalueDays - res.P[personObj.person].holiday - showLeaveWorkdays() + ((today.getDay() < 7&&today.getDay() > 0) ? 1 : 0)));
+                    var temp = {};
+                    temp.name = res.P[personObj.person].name;
+                    temp.pf = pf;
+                    sorts.push(temp);
+                }
+            });
+            sorts.sort(function (a, b) {
+                return a.pf > b.pf ? -1 : 1;
+            });
+            // sorts.forEach(function(s) {
+            for (var i in sorts) {
+                var j = i;
+                j++;
+                var h = 0;
+                for(var k in relation) {
+                    if(sorts[i].pf < relation[k][1] && sorts[i].pf >= relation[k][0]) {
+                        h = k;
+                    }
+                }
+
+                var c = parseInt(sorts[i].pf)< 65?'color: #f0798b;':'color: #ccc;';
+                $('#u1').append(' <li style="font-size: 24px;"><span class="rank">' + j + '</span><span class="name" style="width:100px;">' + sorts[i].name + '</span><span class="name" style="width:90px;'+c+'">' + sorts[i].pf.toFixed(2) + '</span><span class="name" style="width:90px;'+ c +';" >' +  h + '%</span></li> ')
+            }
+        }
+        $(function () {
+            getStaffPerformance();
+            setInterval(getStaffPerformance, 1000 * 60 *10);
+        });
+    </script>
+</head>
+<body>
+<div style=" width:1600px;margin: 0 auto;" id="list"></div>
+<div style="width: 400px; height: 800px; position: absolute;left:1300px">
+    <div class="box2" id="movie_rank">
+        <div class="inner">
+            <h3 class="title">绩效天数: <span id="workdate" style="font-size: 25px;"></span> 天&nbsp;&nbsp;&nbsp;<span id="refreshdate" ></span></h3>
+            <ul class="rank_list" id="u1">
+            </ul>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+
+
+
+
+

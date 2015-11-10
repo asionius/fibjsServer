@@ -97,6 +97,17 @@ function client() {
 			taskDetail[addInfo[i].action] = taskDetail[addInfo[i].action] ? taskDetail[addInfo[i].action] : {};
 			// taskDetail[addInfo[i].action].creator = addInfo[i].creator.name;
 			switch (addInfo[i].action) {
+				case "comment":
+					if (taskDetail[addInfo[i].action].created) {
+						if (new Date(addInfo[i].created) > new Date(taskDetail[addInfo[i].action].created)) {
+							taskDetail[addInfo[i].action].creator = addInfo[i].creator.name;
+							taskDetail[addInfo[i].action].created = addInfo[i].created;
+						}
+					} else {
+						taskDetail[addInfo[i].action].creator = addInfo[i].creator.name;
+						taskDetail[addInfo[i].action].created = addInfo[i].created;
+					}
+					break;
 				case "set_priority":
 					if (taskDetail[addInfo[i].action].created) {
 						if (new Date(addInfo[i].created) > new Date(taskDetail[addInfo[i].action].created)) {
