@@ -1,0 +1,121 @@
+<div class="pageheader">
+    <h2>任务列表</h2>
+    <p class="description">{{main.headerText}}  数据更新于{{lastUpdate}}</p>
+    <div class="breadcrumb-wrapper hidden-xs">
+        <span class="label"> 当前位置：</span>
+        <ol class="breadcrumb">
+            <li class="active">任务详情</li>
+        </ol>
+    </div>
+</div>
+<section id="main-content">
+    <div class="row">
+        <div class="col-md-12 col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading form-inline">
+                    <div class="form-group">
+                        <select class="form-control" ng-model="depart"  ng-options="code as code for (code, name)  in partment">
+                            <option value="">请选择部门</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <select class="form-control" ng-model="name"  ng-options="name for name  in partment[depart]" ng-change="change()">
+                            <option value="">请选择成员</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <h4> {{taskman.partment}}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" ng-if="taskman">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">To do List</h3>
+                    <div class="actions pull-right">
+                        <i data-fullscreen-widget="" class="fa fa-expand"></i>
+                        <i data-widget-toggle="" class="fa fa-chevron-down"></i>
+                        <i data-widget-close="" class="fa fa-times"></i>
+                    </div>
+                </div>
+                <div class="panel-body">
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>任务名称</th>
+                                <th>所属项目</th>
+                                <th>所处阶段</th>
+                                <th>p级*工期</th>
+                                <th>截止日期</th>
+                                <th>暂停备注</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr ng-repeat= "task in taskman.tasks | filter: {isEnd : undefined}">
+                                <td>{{$index + 1}}</td>
+                                <td>{{task.name}}</td>
+                                <td>{{task.project}}</td>
+                                <td>{{task.stage}}</td>
+                                <td>{{trans(task.comment.set_note.note)[1] ? trans(task.comment.set_note.note)[1] : '未评定'}}</td>
+                                <td>{{task.comment.set_duedate.dueDate}}</td>
+                                <td>{{trans(task.comment.set_note.note)[3] ? trans(task.comment.set_note.note)[3] : '无暂停'}}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" ng-if="taskman">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">已完成任务</h3>
+                    <div class="actions pull-right">
+                        <i data-fullscreen-widget="" class="fa fa-expand"></i>
+                        <i data-widget-toggle="" class="fa fa-chevron-down"></i>
+                        <i data-widget-close="" class="fa fa-times"></i>
+                    </div>
+                </div>
+                <div class="panel-body">
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>任务名称</th>
+                                <th>所属项目</th>
+                                <th>月份</th>
+                                <th>p级*工期</th>
+                                <th>评分</th>
+                                <th>暂停备注</th>
+                                <th>操作人</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr ng-repeat= "task in taskman.tasks | filter: !task.isEnd">
+                                <td>{{$index + 1}}</td>
+                                <td>{{task.name}}</td>
+                                <td>{{task.project}}</td>
+                                <td>{{trans(task.comment.set_note.note)[0] ? trans(task.comment.set_note.note)[0] : ''}}</td>
+                                <td>{{trans(task.comment.set_note.note)[1] ? trans(task.comment.set_note.note)[1] : '未评定'}}</td>
+                                <td>{{trans(task.comment.set_note.note)[2] ? trans(task.comment.set_note.note)[2] : ''}}</td>
+                                <td>{{trans(task.comment.set_note.note)[3] ? trans(task.comment.set_note.note)[3] : '无暂停'}}</td>
+                                <td>{{task.comment.set_done.creator}}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

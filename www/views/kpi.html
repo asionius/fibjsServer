@@ -1,0 +1,65 @@
+<div class="pageheader">
+    <h2>任务列表</h2>
+    <p class="description">{{main.headerText}}  数据更新于{{lastUpdate}}</p>
+    <div class="breadcrumb-wrapper hidden-xs">
+        <span class="label"> 当前位置：</span>
+        <ol class="breadcrumb">
+            <li class="active">绩效考核</li>
+        </ol>
+    </div>
+</div>
+<section id="main-content">
+    <div class="row">
+        <div class="col-md-12 col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading form-inline">
+                    <div class="form-group">
+                        <select class="form-control" ng-model="depart"  ng-options="code as code for (code, name)  in partment">
+                            <option value="">请选择部门</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="确定本月考核天数" ng-model="kpiDate">
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-primary" ng-click="showKpi()" style="margin-bottom: 0">确定</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" ng-if="kpiList">
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">绩效列表 距离下一个考核月还剩 {{showLeaveWorkdays()}} 个工作日</h3>
+                    <div class="actions pull-right">
+                        <i data-fullscreen-widget="" class="fa fa-expand"></i>
+                        <i data-widget-toggle="" class="fa fa-chevron-down"></i>
+                        <i data-widget-close="" class="fa fa-times"></i>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>姓名</th>
+                                <th>绩效</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr ng-repeat= "member in kpiDetail">
+                                <td>{{$index + 1}}</td>
+                                <td>{{member.name}}</td>
+                                <td>{{member.kpi}}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
