@@ -870,7 +870,8 @@ return format;
             var sorts = [];
             $('#u1').empty();
             res.infos.forEach(function (personObj) {
-                var pf = 0;
+                var pf = 0,
+                    tc = 0;
                 for (var task in personObj['tasks']) {
                     if (personObj['tasks'][task].isEnd == 'true') {
                         var set_note = personObj['tasks'][task].comment.set_note;
@@ -879,7 +880,10 @@ return format;
                         var pJ = note ? (note[1] ? note[1] : 0) : 0;
                         var score = note ? (note[2] ? note[2] : 0) : 0;
                         var pause = note ? (note[3] ? note[3] : 0) : 0;
-                    } else continue;
+                    } else {
+                        tc++;
+                        continue; 
+                    }
                     if (month && pJ && score) {
             if(/\d+月/.test(month) === false) {
                 continue;
@@ -923,6 +927,7 @@ return format;
                     var temp = {};
                     temp.name = res.P[personObj.person].name;
                     temp.pf = pf;
+                    temp.tc = tc;
                     sorts.push(temp);
                 }
             });
@@ -941,7 +946,7 @@ return format;
                 }
 
                 var c = parseInt(sorts[i].pf)< 65?'color: #f0798b;':'color: #ccc;';
-                $('#u1').append(' <li style="font-size: 24px;"><span class="rank">' + j + '</span><span class="name" style="width:100px;">' + sorts[i].name + '</span><span class="name" style="width:90px;'+c+'">' + sorts[i].pf.toFixed(2) + '</span><span class="name" style="width:90px;'+ c +';" >' +  h + '%</span></li> ')
+                $('#u1').append(' <li style="font-size: 24px;"><span class="rank">' + j + '</span><span class="name" style="width:100px;">' + sorts[i].name + '</span><span class="name" style="width:90px;'+c+'">' + sorts[i].pf.toFixed(2) + '</span><span class="name" style="width:60px;'+ c +';" >' +  h + '%</span><span class="name" style="width:50px">'+sorts[i].tc+'</span></li> ')
             }
         }
         $(function () {
