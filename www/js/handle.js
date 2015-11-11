@@ -23,8 +23,8 @@ $(function() {
 	// var servers=[{"name": "s16", "ip": "120.55.75.27:9001"}];
 	var servers = [{
 		"name": "s16",
-		"ip": "192.168.1.64"
-			// "ip": "127.0.0.1"
+		// "ip": "192.168.1.64"
+		"ip": "127.0.0.1"
 	}];
 
 	var datatime;
@@ -108,13 +108,13 @@ $(function() {
 			len = lines.length,
 			d = new Date();
 		for (var i = 1; i < len; i++) {
-			lines.eq(i).removeClass('warn');
+			lines.eq(i).find('td').eq(3).removeClass('warn');
 			var j = Number(i) - 1;
 			$('#td' + j + '').removeClass('warn2');
 
 			var due = $('#td' + j + '').find('td').eq(3).html();
 			if (due) {
-				if (new Date().getTime() - new Date(due).getTime() > 1000 * 60 * 60 * 24) lines.eq(i).addClass('warn');
+				if (new Date().getTime() - new Date(due).getTime() > 1000 * 60 * 60 * 24) lines.eq(i).find('td').eq(3).addClass('warn');
 			}
 
 			if ($('#td' + j + '').find('td').eq(2).html() == '未平定' && satgestate.indexOf(res[j].stage) !== -1) {
@@ -168,8 +168,6 @@ $(function() {
 			if (check.indexOf(priorityName[res[task].priority]) != -1) $('#td' + task + '').show();
 			else $('#td' + task + '').hide();
 		}
-
-
 		checkAll();
 	}
 
