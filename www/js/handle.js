@@ -142,7 +142,6 @@ $(function() {
 	}
 
 	function getTask() {
-		getTime();
 		$.ajax({
 			type: "GET",
 			url: "http://" + servers[0]["ip"] + "/teambition/list/技术部",
@@ -157,6 +156,7 @@ $(function() {
 			}
 		});
 		fillTable();
+		getTime();
 	}
 
 	function clickPriority() {
