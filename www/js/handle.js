@@ -27,7 +27,7 @@ $(function() {
 			// "ip": "127.0.0.1"
 	}];
 
-	var baozObject;
+	var datatime;
 	Date.prototype.format = function(format) {
 		var o = {
 			"M+": this.getMonth() + 1, //month
@@ -50,19 +50,18 @@ $(function() {
 	function getTime() {
 		$.ajax({
 			type: "GET",
-			url: "http://" + servers[0]["ip"] + "/teambition/root",
+			url: "http://" + servers[0]["ip"] + "/teambition/gettime",
 			async: false,
 			timeout: 1000 * 60,
 			dataType: "text",
 			success: function(result) {
-				baozObject = tojson(result);
+				datatime = tojson(result);
 			},
 			error: function(result) {
 				console.error(result);
 			}
 		})
-		partment = baozObject.partment;
-		time = (new Date(baozObject.created)).toString();
+		time = (new Date(datatime)).toString();
 		$('#time').text('数据更新于' + time + '');
 	}
 
@@ -143,6 +142,7 @@ $(function() {
 	}
 
 	function getTask() {
+		getTime();
 		$.ajax({
 			type: "GET",
 			url: "http://" + servers[0]["ip"] + "/teambition/list/技术部",
@@ -272,10 +272,8 @@ $(function() {
 		}
 		clickPriority();
 	}
-	getP();
-	getTime();
+	// getP();
+
 	getTask();
 	setInterval(getTask, 1000 * 60 * 10);
-
-	setInterval(getTime, 1000 * 60 * 10);
 });

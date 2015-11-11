@@ -15,6 +15,7 @@ bigData = JSON.parse(bigData);
 var client = operate();
 
 var lruCache = new util.LruCache(1000, 1000 * 60 * 60);
+var time;
 
 var refresh = function() {
 	coroutine.start(function() {
@@ -66,10 +67,11 @@ var refresh = function() {
 				})
 			})
 		});
+		time = (new Date()).getTime();
 		var result = {
 			project: project,
 			partment: partment,
-			created: (new Date()).getTime()
+			created: time
 		}
 		fs.writeFile('./bigData.json', JSON.stringify(result));
 		lruCache.set('root', result);
@@ -79,10 +81,12 @@ var refresh = function() {
 
 var fillTeamBition = function() {
 	if (bigData && (new Date()).getTime() - bigData.created < 1000 * 60 * 60) {
+		time = bigData.created;
 		return bigData;
 	} else {
 		var data = JSON.parse(fs.readFile('./bigData.json'));
 		refresh();
+		time = data.created;
 		return data;
 	}
 
@@ -109,6 +113,9 @@ var getP = function() {
 	return P;
 }
 
+var gettime = function() {
+	return time;
+}
 module.exports = function(v) {
 	var teambition = {
 		root: fillTeamBition,
@@ -116,7 +123,8 @@ module.exports = function(v) {
 		performance: getPerformanceByPartmentName,
 		list: listTasks,
 		refresh: refresh,
-		P: getP
+		P: getP,
+		gettime: gettime
 	};
 	v.value = v.value ? encoding.decodeURI(v.value) : "";
 	var ps = v.value.split('/'),
