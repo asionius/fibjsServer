@@ -15,7 +15,6 @@ bigData = JSON.parse(bigData);
 var client = operate();
 
 var lruCache = new util.LruCache(1000, 1000 * 60 * 60);
-var time;
 
 var refresh = function() {
 	coroutine.start(function() {
@@ -67,26 +66,23 @@ var refresh = function() {
 				})
 			})
 		});
-		time = (new Date()).getTime();
 		var result = {
 			project: project,
 			partment: partment,
-			created: time
+			created: (new Date()).getTime()
 		}
 		fs.writeFile('./bigData.json', JSON.stringify(result));
 		lruCache.set('root', result);
 	})
-	return 'refreshing ...'
+	return 'refreshing ...';
 }
 
 var fillTeamBition = function() {
 	if (bigData && (new Date()).getTime() - bigData.created < 1000 * 60 * 60) {
-		time = bigData.created;
 		return bigData;
 	} else {
 		var data = JSON.parse(fs.readFile('./bigData.json'));
 		refresh();
-		time = data.created;
 		return data;
 	}
 
@@ -114,7 +110,7 @@ var getP = function() {
 }
 
 var gettime = function() {
-	return time;
+	return lruCache.get("root", fillTeamBition).created;
 }
 module.exports = function(v) {
 	var teambition = {
@@ -122,15 +118,24 @@ module.exports = function(v) {
 		search: getObjByName,
 		performance: getPerformanceByPartmentName,
 		list: listTasks,
-		refresh: refresh,
-		P: getP,
-		gettime: gettime
+		P: getP
 	};
 	v.value = v.value ? encoding.decodeURI(v.value) : "";
 	var ps = v.value.split('/'),
 		a = ps[1],
-		b = ps[2] ? a + '_' + ps[2] : a;
-	// console.log(a, b);
-	var r = lruCache.get(b, teambition[a]);
+		b = ps[2] ? a + '_' + ps[2] : a,
+		r;
+	switch (a) {
+		case 'refresh':
+			r = refresh();
+			break;
+		case 'gettime':
+			r = gettime();
+			break;
+		default:
+			r = lruCache.get(b, teambition[a]);
+			break;
+	}
+
 	response.amd(v, r);
 }
