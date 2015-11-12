@@ -85,8 +85,8 @@ var fillTeamBition = function() {
 		refresh();
 		return data;
 	}
-
 }
+
 var getObjByName = function(person) {
 	person = person.split('_')[1];
 	var obj = lruCache.get("root", fillTeamBition);

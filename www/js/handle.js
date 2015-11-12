@@ -23,8 +23,8 @@ $(function() {
 	// var servers=[{"name": "s16", "ip": "120.55.75.27:9001"}];
 	var servers = [{
 		"name": "s16",
-		"ip": "192.168.1.64"
-			// "ip": "127.0.0.1"
+		// "ip": "192.168.1.64"
+		"ip": "127.0.0.1"
 	}];
 
 	var datatime;
@@ -155,20 +155,12 @@ $(function() {
 				console.error(result);
 			}
 		});
+		res = res.filter(function(v) {
+			if (Number(v.priority) > 0) return true;
+			else return false;
+		})
 		fillTable();
 		getTime();
-	}
-
-	function clickPriority() {
-		var check = [];
-		check.push("紧急");
-		check.push("非常紧急");
-		console.log(check)
-		for (var task in res) {
-			if (check.indexOf(priorityName[res[task].priority]) != -1) $('#td' + task + '').show();
-			else $('#td' + task + '').hide();
-		}
-		checkAll();
 	}
 
 	function clickStage() {
@@ -206,15 +198,25 @@ $(function() {
 				$('#td' + task + '').show();
 			}
 		}
+	}
 
+	function parseRelation(set_note) {
+		var snote = set_note ? set_note.note : '',
+			relation = '';
+		if (snote && snote.indexOf('v1.1001') != -1) {
+			var note = JSON.parse(snote);
+
+			relation = '产品: ' + note.prod.person.name + ' ' + note.prod.person.P + ' ' + note.prod.person.time + ' 技术: ' + note.tech.person.name + ' ' + note.tech.person.P + ' ' + note.tech.person.time;
+		} else relation = '未设置干系人';
+		return relation;
 	}
 
 	function fillTable() {
 		$('#table').empty();
-		$('#table').append('<tr id="thead"style="color:blue;"><td class="index">编号</td><td>任务名称</td><td class="p" title="p级*工期">p级*工期</td><td class="due">截止日期</td><td class="pause">暂停备注</td><td class="executor">执行人</td><td class="project">所属项目</td><td class="confirmquestion" value="需求确认" title="需求确认">需求</td><td class="solution" value="解决方案" title="解决方案">解决案</td><td class="product" value="开发">开发</td><td class="test" value="测试版">测试版</td><td class="preview" value="预览版">预览版</td><td class="result" value="正式版">正式版</td><td class="score">评分</td></tr>');
+		$('#table').append('<tr id="thead"style="color:blue;"><td class="index">编号</td><td class="taskname">任务名称</td><td class="p" title="p级*工期">p级*工期</td><td class="due">截止日期</td><td class="pause">暂停备注</td><td class="executor">执行人</td><td class="project">所属项目</td><td class="confirmquestion" value="需求确认" title="需求确认">需求</td><td class="solution" value="解决方案" title="解决方案">解决案</td><td class="product" value="开发">开发</td><td class="test" value="测试版">测试版</td><td class="preview" value="预览版">预览版</td><td class="result" value="正式版">正式版</td><td class="score">评分</td><td class="relation">干系人</td></tr>');
 		for (var task in res) {
 			if (house) {
-				$('#table').append("<tr id='td" + task + "' style='background-color: #F5F5F5;'></tr>");
+				$('#table').append("<tr id='td" + task + "' style='background-color: #d5d5d5;'></tr>");
 
 			} else {
 				$('#table').append("<tr id='td" + task + "' ></tr>");
@@ -264,11 +266,11 @@ $(function() {
 				$('#td' + task + '').append("<td class='preview'>" + preview + "</td>");
 				$('#td' + task + '').append("<td class='result'>" + result + "</td>");
 			}
-
 			$('#td' + task + '').append("<td>" + score + "</td>");
-
+			var relation = parseRelation(res[task].comment.set_note);
+			$('#td' + task + '').append("<td class='relation' title='" + relation + "'>" + relation + "</td>");
 		}
-		clickPriority();
+		checkAll();
 	}
 	// getP();
 
