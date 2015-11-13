@@ -22,8 +22,8 @@ $(function() {
 	// var servers=[{"name": "s16", "ip": "120.55.75.27:9001"}];
 	var servers = [{
 		"name": "s16",
-		"ip": "192.168.1.64"
-			// "ip": "127.0.0.1"
+		// "ip": "192.168.1.64"
+		"ip": "127.0.0.1"
 	}];
 
 	var baozObject;
@@ -170,7 +170,7 @@ $(function() {
 		var due = document.getElementById('due').checked;
 		if (due) {
 			for (var task in res) {
-				if ($('#td' + task + '').find('td').eq(3).html()) $('#td' + task + '').show();
+				if ($('#td' + task + '').find('td').eq(2).html()) $('#td' + task + '').show();
 				else $('#td' + task + '').hide();
 			}
 		} else {
@@ -232,6 +232,8 @@ $(function() {
 				console.error(result);
 			}
 		})
+		$('#taskmanager').removeClass('activemanager');
+		$('#taskmanager').addClass('taskmanager');
 	}
 
 	function getPartment(person) {
@@ -286,7 +288,7 @@ $(function() {
 			$('#tday').val('');
 			$('#mpause').val('无');
 		}
-
+		$('#taskname').html(task.name);
 		document.getElementById(executor).selected = true;
 		$('#month').val(month);
 
@@ -296,6 +298,14 @@ $(function() {
 		$('#manager').empty();
 		$('#product').empty();
 		$('#technology').empty();
+		$('#taskname').empty();
+		$('#month').val('');
+		$('#mpause').val('无');
+		$('#mscore').val('');
+		$('#pP').val('');
+		$('#pday').val('');
+		$('#tP').val('');
+		$('#tday').val('');
 		$('#product').append('<option>请选择</option>');
 		$('#technology').append('<option>请选择</option>');
 		$('#manager').append('<option>请选择编号</option>');
@@ -311,6 +321,8 @@ $(function() {
 		for (var i in partment['技术部']) {
 			$('#technology').append('<option id="' + partment['技术部'][i] + '">' + partment['技术部'][i] + '</option>');
 		}
+		$('#taskmanager').removeClass('activemanager');
+		$('#taskmanager').addClass('taskmanager');
 
 	}
 
@@ -325,9 +337,18 @@ $(function() {
 		return relation;
 	}
 
+	function modifyRelation() {
+		var id = $(this).context.id;
+		var taskIndex = Number(id.split('relation')[1]);
+		$('#manager').val(taskIndex + 1);
+		$('#taskmanager').removeClass('taskmanager');
+		$('#taskmanager').addClass('activemanager');
+		manager();
+	}
+
 	function fillTable() {
 		$('#table').empty();
-		$('#table').append('<tr id="thead"style="color:blue;"><td class="index">编号</td><td><input type="checkbox" value="紧急" id="hurry">紧急任务<input type="checkbox" value="非常紧急" id="vhurry">非常紧急<input type="checkbox" value="普通" id="normal">普通任务</td><td class="p" title="p级*工期">p级*工期</td><td class="due"><input type="checkbox" value="截止日期" id="due">截止日期</td><td class="executor">执行人</td><td class="project">所属项目</td><td class="pause">暂停备注</td><td class="confirmquestion" value="需求确认" title="需求确认"><input type="checkbox" value="需求确认" id="cq">需求</td><td class="solution" value="解决方案" title="解决方案"><input type="checkbox" value="解决方案" id="sl">解决案</td><td class="product" value="开发"><input type="checkbox" value="开发" id="pd">开发</td><td class="test" value="测试版"><input type="checkbox" value="测试版" id="tt">测试版</td><td class="preview" value="预览版"><input type="checkbox" value="预览版" id="pv">预览版</td><td class="result" value="正式版"><input type="checkbox" value="正式版" id="rs">正式版</td><td class="stage" value="其它阶段"><input type="checkbox" value="其它阶段" id="os">所有阶段</td><td class="relation">干系人</td></tr>');
+		$('#table').append('<tr id="thead"style="color:blue;"><td class="index">编号</td><td><input type="checkbox" value="紧急" id="hurry">紧急任务<input type="checkbox" value="非常紧急" id="vhurry">非常紧急<input type="checkbox" value="普通" id="normal">普通任务</td><td class="due"><input type="checkbox" value="截止日期" id="due">截止日期</td><td class="executor">负责人</td><td class="project">所属项目</td><td class="pause">暂停备注</td><td class="confirmquestion" value="需求确认" title="需求确认"><input type="checkbox" value="需求确认" id="cq">需求</td><td class="solution" value="解决方案" title="解决方案"><input type="checkbox" value="解决方案" id="sl">解决案</td><td class="product" value="开发"><input type="checkbox" value="开发" id="pd">开发</td><td class="test" value="测试版"><input type="checkbox" value="测试版" id="tt">测试版</td><td class="preview" value="预览版"><input type="checkbox" value="预览版" id="pv">预览版</td><td class="result" value="正式版"><input type="checkbox" value="正式版" id="rs">正式版</td><td class="stage" value="其它阶段"><input type="checkbox" value="其它阶段" id="os">所有阶段</td><td class="relation">干系人</td></tr>');
 
 		for (var task in res) {
 			if (house) {
@@ -351,7 +372,7 @@ $(function() {
 			var pause = note ? (note[2] ? note[2] : '无') : '无';
 			if (!/^\d+[hd]$/.test(pause)) pause = '无';
 
-			$('#td' + task + '').append("<td>" + pJ + "</td>");
+			// $('#td' + task + '').append("<td>" + pJ + "</td>");
 
 			var set_duedate = res[task].comment.set_duedate;
 			var dueDate = set_duedate ? set_duedate.dueDate : '';
@@ -375,15 +396,17 @@ $(function() {
 			$('#td' + task + '').append("<td class='result'>" + result + "</td>");
 			$('#td' + task + '').append("<td class='stage'>" + res[task].stage + "</td>");
 			var relation = parseRelation(res[task].comment.set_note);
-			$('#td' + task + '').append("<td class='relation' title='" + relation + "'>" + relation + "</td>");
+			$('#td' + task + '').append("<td class='relation' title='" + relation + "'>" + relation + "<button id='relation" + task + "'style='padding-top: 1px; padding-bottom:1px; float: right;'>修改</button></td>");
 		}
 		premanager();
 	}
+
 	getP();
 	getTime();
 	getTask();
 	$('#refresh').click(refresh);
 	$('#manager').change(manager);
+	$('td button').click(modifyRelation);
 	$('#hurry').click(clickPriority);
 	$('#vhurry').click(clickPriority);
 	$('#normal').click(clickPriority);
@@ -396,6 +419,7 @@ $(function() {
 	$('#os').click(clickStage);
 	$('#due').click(clickDue);
 	$('#submit').click(setNote);
+	$('#cancel').click(premanager);
 	setInterval(getTask, 1000 * 60 * 100);
 	setInterval(getTime, 1000 * 60 * 60);
 });
