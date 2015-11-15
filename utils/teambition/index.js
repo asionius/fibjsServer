@@ -6,7 +6,7 @@ var partment = require("./partment.js");
 var P = require("./P.json");
 var M = require("./M.json");
 var encoding = require('encoding');
-var analyze = require("./analysis.js").analyze;
+var searchPersonTasks = require("./analysis.js").searchPersonTasks;
 var performance = require("./analysis.js").performance;
 var getTaskList = require("./analysis.js").getTaskList;
 var fs = require('fs');
@@ -90,7 +90,7 @@ var fillTeamBition = function() {
 var getObjByName = function(person) {
 	person = person.split('_')[1];
 	var obj = lruCache.get("root", fillTeamBition);
-	return analyze(person, obj);
+	return searchPersonTasks(person, obj);
 }
 
 var getPerformanceByPartmentName = function(partmentName) {
