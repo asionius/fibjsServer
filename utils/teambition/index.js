@@ -72,6 +72,7 @@ var refresh = function() {
 			created: (new Date()).getTime()
 		}
 		fs.writeFile('./bigData.json', JSON.stringify(result));
+		lruCache.clear();
 		lruCache.set('root', result);
 	})
 	return 'refreshing ...';
