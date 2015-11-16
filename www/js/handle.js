@@ -108,17 +108,13 @@ $(function() {
 			len = lines.length,
 			d = new Date();
 		for (var i = 1; i < len; i++) {
-			lines.eq(i).find('td').eq(3).removeClass('warn');
+			lines.eq(i).find('td').eq(2).removeClass('warn');
 			var j = Number(i) - 1;
 			$('#td' + j + '').removeClass('warn2');
 
-			var due = $('#td' + j + '').find('td').eq(3).html();
+			var due = $('#td' + j + '').find('td').eq(2).html();
 			if (due) {
-				if (new Date().getTime() - new Date(due).getTime() > 1000 * 60 * 60 * 24) lines.eq(i).find('td').eq(3).addClass('warn');
-			}
-
-			if ($('#td' + j + '').find('td').eq(2).html() == '未平定' && satgestate.indexOf(res[j].stage) !== -1) {
-				$('#td' + j + '').find('td').eq(2).addClass('warn1');
+				if (new Date().getTime() - new Date(due).getTime() > 1000 * 60 * 60 * 24) lines.eq(i).find('td').eq(2).addClass('warn');
 			}
 
 			if (d.getHours() == 17 && d.getMinutes() > 30) {
@@ -213,7 +209,7 @@ $(function() {
 
 	function fillTable() {
 		$('#table').empty();
-		$('#table').append('<tr id="thead"style="color:blue;"><td class="index">编号</td><td class="taskname">任务名称</td><td class="p" title="p级*工期">p级*工期</td><td class="due">截止日期</td><td class="pause">暂停备注</td><td class="executor">执行人</td><td class="project">所属项目</td><td class="confirmquestion" value="需求确认" title="需求确认">需求</td><td class="solution" value="解决方案" title="解决方案">解决案</td><td class="product" value="开发">开发</td><td class="test" value="测试版">测试版</td><td class="preview" value="预览版">预览版</td><td class="result" value="正式版">正式版</td><td class="score">评分</td><td class="relation">干系人</td></tr>');
+		$('#table').append('<tr id="thead"style="color:blue;"><td class="index">编号</td><td class="taskname">任务名称</td><td class="due">截止日期</td><td class="pause">暂停备注</td><td class="executor">负责人</td><td class="project">所属项目</td><td class="confirmquestion" value="需求确认" title="需求确认">需求</td><td class="solution" value="解决方案" title="解决方案">解决案</td><td class="product" value="开发">开发</td><td class="test" value="测试版">测试版</td><td class="preview" value="预览版">预览版</td><td class="result" value="正式版">正式版</td><td class="score">评分</td><td class="relation">干系人</td></tr>');
 		for (var task in res) {
 			if (house) {
 				$('#table').append("<tr id='td" + task + "' style='background-color: #d5d5d5;'></tr>");
@@ -239,7 +235,7 @@ $(function() {
 			if (!/^\d+[hd]$/.test(pause)) pause = '无';
 			var set_duedate = res[task].comment.set_duedate;
 			var dueDate = set_duedate ? set_duedate.dueDate : '';
-			$('#td' + task + '').append("<td>" + pJ + "</td>");
+			// $('#td' + task + '').append("<td>" + pJ + "</td>");
 			// var checkdue = dueDate ? new Date(dueDate) : '';
 			// if (checkdue) {
 			// 	if (new Date().getTime() - checkdue.getTime() < 1000 * 60 * 60 * 12) sendemail(res[task]);
