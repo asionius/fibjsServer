@@ -6,6 +6,8 @@ function tojson(v) {
 	return json;
 }
 
+var exceptKpi = ['李操', '吴安', '衣不如新', '响马', '青蛙', '杜婷婷'];
+
 app.controller('MainCtrl', function($scope, $http) {
 	this.projectBoldName = 'NAME';
 	this.projectName = '--teambetion';
@@ -53,6 +55,7 @@ app.controller('MainCtrl', function($scope, $http) {
 			$scope.kpiInfo = $scope.kpiList.infos;
 			$scope.kpiDetail = [];
 			$scope.kpiInfo.forEach(function(personObj) {
+				if (exceptKpi.indexOf(personObj.person) !== -1) return;
 				var pf = 0;
 				for (var task in personObj['tasks']) {
 					if (personObj['tasks'][task].isEnd == 'true') {
@@ -64,10 +67,10 @@ app.controller('MainCtrl', function($scope, $http) {
 						var pause = note ? (note[3] ? note[3] : 0) : 0;
 					} else continue;
 					if (month && pJ && score) {
-						if(/\d+月/.test(month) === false) {
+						if (/\d+月/.test(month) === false) {
 							continue;
 						}
-						if(new Date().getMonth() + 1 !== Number(month.split('月')[0])) {
+						if (new Date().getMonth() + 1 !== Number(month.split('月')[0])) {
 							continue;
 						}
 						if (/^p\d+\*\d*\.*\d+[hd]$/.test(pJ) === false) {
