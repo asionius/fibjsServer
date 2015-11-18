@@ -58,32 +58,49 @@ var searchPersonTasks = function(person, obj) {
 							taskObj.itemid = task.personid;
 							taskObj.id = task.id;
 							taskObj.stage = st;
-							if (task.note.set_note) {
-								var note = parseNote(task.note.set_note.note);
-								if (util.isObject(note) && note[person]) task.note.set_note.note = note[person];
+							//旧的teambition接口
+							// if (task.note.set_note) {
+							// 	var note = parseNote(task.note.set_note.note);
+							// 	if (util.isObject(note) && note[person]) task.note.set_note.note = note[person];
+							// };
+							if (task.newnote) {
+								var note = parseNote(task.newnote);
+								if (util.isObject(note) && note[person]) task.newnote = note[person];
 							};
-							taskObj.comment = task.note;
+							taskObj.updated = task.updated;
+							taskObj.created = task.created;
+							taskObj.dueDate = task.dueDate;
+							taskObj.note = task.newnote;
 							taskObj.isEnd = task.isEnd;
-							taskObj.priority = task.note.set_priority ? task.note.set_priority.priority : 0;
+							taskObj.priority = task.priority;
 							taskObj.executor = person;
 							result.tasks.push(taskObj);
 						} else {
-							if (task.note.set_note) {
-								var note = parseNote(task.note.set_note.note);
-								if (util.isObject(note) && note[person]) task.note.set_note.note = note[person];
+							//旧数据格式
+							// if (task.note.set_note) {
+							// 	var note = parseNote(task.note.set_note.note);
+							// 	if (util.isObject(note) && note[person]) task.note.set_note.note = note[person];
+							// 	else continue;
+							// } else continue;
+							if (task.newnote) {
+								var note = parseNote(task.newnote);
+								if (util.isObject(note) && note[person]) task.newnote = note[person];
 								else continue;
 							} else continue;
 
 							var taskObj = {};
 							taskObj.name = i;
+							taskObj.updated = task.updated;
+							taskObj.created = task.created;
+							taskObj.dueDate = task.dueDate;
 							taskObj.project = project;
 							taskObj.projectid = task.projectid;
 							taskObj.itemid = task.personid;
 							taskObj.id = task.id;
 							taskObj.stage = st;
-							taskObj.comment = task.note;
+							taskObj.note = task.newnote;
 							taskObj.isEnd = task.isEnd;
-							taskObj.priority = task.note.set_priority ? task.note.set_priority.priority : 0;
+							taskObj.priority = task.priority;
 							taskObj.executor = person;
 							result.tasks.push(taskObj);
 
@@ -128,9 +145,12 @@ var analyze = function(person, obj) {
 							taskObj.itemid = task.personid;
 							taskObj.id = task.id;
 							taskObj.stage = st;
-							taskObj.comment = task.note;
+							taskObj.note = task.newnote;
 							taskObj.isEnd = task.isEnd;
-							taskObj.priority = task.note.set_priority ? task.note.set_priority.priority : 0;
+							taskObj.priority = task.priority;
+							taskObj.updated = task.updated;
+							taskObj.created = task.created;
+							taskObj.dueDate = task.dueDate;
 							taskObj.executor = person;
 							result.tasks.push(taskObj);
 						} else if (person === '未指派') {
@@ -142,9 +162,12 @@ var analyze = function(person, obj) {
 								taskObj.itemid = task.personid;
 								taskObj.id = task.id;
 								taskObj.stage = st;
-								taskObj.comment = task.note;
+								taskObj.note = task.newnote;
 								taskObj.isEnd = task.isEnd;
-								taskObj.priority = task.note.set_priority ? task.note.set_priority.priority : 0;
+								taskObj.priority = task.priority;
+								taskObj.updated = task.updated;
+								taskObj.created = task.created;
+								taskObj.dueDate = task.dueDate;
 								taskObj.executor = person;
 								result.tasks.push(taskObj);
 							}

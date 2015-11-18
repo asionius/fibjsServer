@@ -46,21 +46,27 @@ var refresh = function() {
 					var tasks = JSON.parse(client.getTasks(taskList._id, isEnd));
 					// coroutine.parallel(tasks, function(task) {
 					tasks.forEach(function(task) {
-
-						try {
-							var note = client.getNoteByTaskId(task._id),
-								content = {};
-						} catch (e) {
-							return;
-						}
+						var content = {};
+						// try {
+						// 	var note = client.getNoteByTaskId(task._id),
+						// 		content = {};
+						// } catch (e) {
+						// 	return;
+						// }
 
 						var t = content[task.content] = {};
 						t.executor = task.executor ? task.executor.name : "";
-						t.note = note;
+						t.priority = task.priority;
+						t.updated = task.updated;
+						t.created = task.created;
+						t.dueDate = task.dueDate;
+						t.isEnd = task.isDone;
+						t.newnote = task.note;
+						// t.note = note;
 						t.projectid = pId;
 						t.personid = person._id;
 						t.id = task._id;
-						if (isEnd) t.isEnd = 'true';
+						// if (isEnd) t.isEnd = 'true';
 						ts.push(content);
 					})
 				})

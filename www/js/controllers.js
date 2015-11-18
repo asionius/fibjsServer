@@ -58,9 +58,9 @@ app.controller('MainCtrl', function($scope, $http) {
 				if (exceptKpi.indexOf(personObj.person) !== -1) return;
 				var pf = 0;
 				for (var task in personObj['tasks']) {
-					if (personObj['tasks'][task].isEnd == 'true') {
-						var set_note = personObj['tasks'][task].comment.set_note;
-						var note = set_note ? (set_note.note ? set_note.note.split('\r\n') : '') : '';
+					if (personObj['tasks'][task].isEnd) {
+						var set_note = personObj['tasks'][task].note;
+						var note = set_note ? set_note.split('\r\n') : '';
 						var month = note ? (note[0] ? note[0] : 0) : 0;
 						var pJ = note ? (note[1] ? note[1] : 0) : 0;
 						var score = note ? (note[2] ? note[2] : 0) : 0;

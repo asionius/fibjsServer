@@ -57,14 +57,14 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr ng-repeat= "task in taskman.tasks | filter: {isEnd : undefined}">
+                            <tr ng-repeat= "task in taskman.tasks | filter: {isEnd : false}">
                                 <td>{{$index + 1}}</td>
                                 <td>{{task.name}}</td>
                                 <td>{{task.project}}</td>
                                 <td>{{task.stage}}</td>
-                                <td>{{trans(task.comment.set_note.note)[1] ? trans(task.comment.set_note.note)[1] : '未评定'}}</td>
-                                <td>{{task.comment.set_duedate.dueDate}}</td>
-                                <td>{{trans(task.comment.set_note.note)[3] ? trans(task.comment.set_note.note)[3] : '无暂停'}}</td>
+                                <td>{{trans(task.note)[1] ? trans(task.note)[1] : '未评定'}}</td>
+                                <td>{{task.dueDate}}</td>
+                                <td>{{trans(task.note)[3] ? trans(task.note)[3] : '无暂停'}}</td>
                             </tr>
                             </tbody>
                         </table>
@@ -105,10 +105,10 @@
                                 <td>{{$index + 1}}</td>
                                 <td>{{task.name}}</td>
                                 <td>{{task.project}}</td>
-                                <td>{{trans(task.comment.set_note.note)[0] ? trans(task.comment.set_note.note)[0] : ''}}</td>
-                                <td>{{trans(task.comment.set_note.note)[1] ? trans(task.comment.set_note.note)[1] : '未评定'}}</td>
-                                <td>{{trans(task.comment.set_note.note)[2] ? trans(task.comment.set_note.note)[2] : ''}}</td>
-                                <td>{{trans(task.comment.set_note.note)[3] ? trans(task.comment.set_note.note)[3] : '无暂停'}}</td>
+                                <td>{{trans(task.note)[0] ? trans(task.note)[0] : ''}}</td>
+                                <td>{{trans(task.note)[1] ? trans(task.note)[1] : '未评定'}}</td>
+                                <td>{{trans(task.note)[2] ? trans(task.note)[2] : ''}}</td>
+                                <td>{{trans(task.note)[3] ? trans(task.note)[3] : '无暂停'}}</td>
                                 <td>{{task.comment.set_done.creator}}</td>
                             </tr>
                             </tbody>

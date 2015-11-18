@@ -23,8 +23,8 @@ $(function() {
 	// var servers=[{"name": "s16", "ip": "120.55.75.27:9001"}];
 	var servers = [{
 		"name": "s16",
-		"ip": "192.168.1.64"
-			// "ip": "127.0.0.1"
+		// "ip": "192.168.1.64"
+		"ip": "127.0.0.1"
 	}];
 
 	var datatime;
@@ -196,9 +196,8 @@ $(function() {
 		}
 	}
 
-	function parseRelation(set_note) {
-		var snote = set_note ? set_note.note : '',
-			relation = '';
+	function parseRelation(snote) {
+		var relation = '';
 		if (snote && snote.indexOf('v1.1001') != -1) {
 			var note = JSON.parse(snote);
 
@@ -223,8 +222,8 @@ $(function() {
 			$('#td' + task + '').append("<td class='index'>" + index + "</td>");
 			// $('#td' + task + '').append("<td class='priority'>" + priority + "</td>");
 			$('#td' + task + '').append("<td class='taskname' title=" + res[task].name + "><a href='https://www.teambition.com/project/" + res[task].projectid + "/tasks/scrum/" + res[task].itemid + "/task/" + res[task].id + "' target='_blank'> <span>" + '<b>[' + priority + '] </b></span>' + res[task].name + "</a></td>");
-			var set_note = res[task].comment.set_note;
-			var note = set_note ? (set_note.note ? set_note.note.split('\r\n') : '') : '';
+			var set_note = res[task].note;
+			var note = set_note ? set_note.split('\r\n') : '';
 			var month = note ? (note[0] ? note[0] : '未知') : '未知';
 			if (!/\d+月/.test(month)) month = '未知';
 			var pJ = note ? (note[1] ? note[1] : '未平定') : '未平定';
@@ -233,8 +232,8 @@ $(function() {
 			if (/^\d+$/.test(score) != true) score = '未评分';
 			var pause = note ? (note[3] ? note[3] : '无') : '无';
 			if (!/^\d+[hd]$/.test(pause)) pause = '无';
-			var set_duedate = res[task].comment.set_duedate;
-			var dueDate = set_duedate ? set_duedate.dueDate : '';
+
+			var dueDate = res[task].dueDate;
 			// $('#td' + task + '').append("<td>" + pJ + "</td>");
 			// var checkdue = dueDate ? new Date(dueDate) : '';
 			// if (checkdue) {
@@ -263,7 +262,7 @@ $(function() {
 				$('#td' + task + '').append("<td class='result'>" + result + "</td>");
 			}
 			$('#td' + task + '').append("<td>" + score + "</td>");
-			var relation = parseRelation(res[task].comment.set_note);
+			var relation = parseRelation(res[task].note);
 			$('#td' + task + '').append("<td class='relation' title='" + relation + "'>" + relation + "</td>");
 		}
 		checkAll();
