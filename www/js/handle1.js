@@ -19,12 +19,6 @@ $(function() {
 		});
 		return json;
 	}
-	// var servers=[{"name": "s16", "ip": "120.55.75.27:9001"}];
-	var servers = [{
-		"name": "s16",
-		"ip": "192.168.1.64"
-			// "ip": "127.0.0.1"
-	}];
 
 	var baozObject;
 	Date.prototype.format = function(format) {
@@ -49,7 +43,7 @@ $(function() {
 	function getP() {
 		$.ajax({
 			type: "GET",
-			url: "http://" + servers[0]["ip"] + "/teambition/P",
+			url: "/teambition/P",
 			async: false,
 			timeout: 1000 * 60,
 			dataType: "text",
@@ -65,7 +59,7 @@ $(function() {
 	function getTime() {
 		$.ajax({
 			type: "GET",
-			url: "http://" + servers[0]["ip"] + "/teambition/root",
+			url: "/teambition/root",
 			async: false,
 			timeout: 1000 * 60,
 			dataType: "text",
@@ -85,7 +79,7 @@ $(function() {
 	function refresh() {
 		$.ajax({
 			type: "GET",
-			url: "http://" + servers[0]["ip"] + "/teambition/refresh",
+			url: "/teambition/refresh",
 			async: false,
 			timeout: 1000 * 60,
 			dataType: "text",
@@ -114,7 +108,7 @@ $(function() {
 	function getTask() {
 		$.ajax({
 			type: "GET",
-			url: "http://" + servers[0]["ip"] + "/teambition/list/技术部",
+			url: "/teambition/list/技术部",
 			async: false,
 			timeout: 1000 * 60,
 			dataType: "text",
@@ -218,7 +212,7 @@ $(function() {
 		};
 		$.ajax({
 			type: "POST",
-			url: "http://" + servers[0]["ip"] + "/setnote/",
+			url: "/setnote/",
 			async: false,
 			timeout: 1000 * 60,
 			data: JSON.stringify(data),

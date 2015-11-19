@@ -21,11 +21,6 @@ $(function() {
 		return json;
 	}
 	// var servers=[{"name": "s16", "ip": "120.55.75.27:9001"}];
-	var servers = [{
-		"name": "s16",
-		"ip": "192.168.1.64"
-			// "ip": "127.0.0.1"
-	}];
 
 	var datatime;
 	Date.prototype.format = function(format) {
@@ -50,7 +45,7 @@ $(function() {
 	function getTime() {
 		$.ajax({
 			type: "GET",
-			url: "http://" + servers[0]["ip"] + "/teambition/gettime",
+			url: "/teambition/gettime",
 			async: false,
 			timeout: 1000 * 60,
 			dataType: "text",
@@ -68,7 +63,7 @@ $(function() {
 	function getP() {
 		$.ajax({
 			type: "GET",
-			url: "http://" + servers[0]["ip"] + "/teambition/P",
+			url: "/teambition/P",
 			async: false,
 			timeout: 1000 * 60,
 			dataType: "text",
@@ -89,7 +84,7 @@ $(function() {
 		};
 		$.ajax({
 			type: "POST",
-			url: "http://" + servers[0]["ip"] + "/sendemail/",
+			url: "/sendemail/",
 			async: false,
 			timeout: 1000 * 60,
 			data: data,
@@ -118,7 +113,7 @@ $(function() {
 			}
 
 			if (d.getHours() == 17 && d.getMinutes() > 30) {
-				if (!res[j].comment.comment || new Date().getTime() - new Date(res[j].comment.comment.created).getTime() > 1000 * 60 * 60 * 24) {
+				if (new Date().getTime() - new Date(res[j].updated).getTime() > 1000 * 60 * 60 * 12) {
 					$('#td' + j + '').addClass('warn2');
 				}
 			}
@@ -140,7 +135,7 @@ $(function() {
 	function getTask() {
 		$.ajax({
 			type: "GET",
-			url: "http://" + servers[0]["ip"] + "/teambition/list/技术部",
+			url: "/teambition/list/技术部",
 			async: false,
 			timeout: 1000 * 60,
 			dataType: "text",
