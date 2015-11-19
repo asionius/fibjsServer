@@ -242,7 +242,7 @@ $(function() {
 	function manager() {
 		var index = Number($('#manager').val()) - 1,
 			task = res[index],
-			snote = task.comment.set_note ? task.comment.set_note.note : '',
+			snote = task.note ? task.note : '',
 			executor = task.executor,
 			month;
 		//兼容新旧数据
