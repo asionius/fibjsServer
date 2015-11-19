@@ -106,6 +106,7 @@ function client() {
 					if (taskDetail[addInfo[i].action].created) {
 						if (new Date(addInfo[i].created) > new Date(taskDetail[addInfo[i].action].created)) {
 							taskDetail[addInfo[i].action].creator = addInfo[i].creator.name;
+							taskDetail[addInfo[i].action].content = addInfo[i].content;
 							taskDetail[addInfo[i].action].created = addInfo[i].created;
 						}
 					} else {
@@ -172,6 +173,7 @@ function client() {
 					taskDetail[addInfo[i].action].creator = addInfo[i].creator.name;
 					break;
 				default:
+					// taskDetail[addInfo[i].action] = addInfo[i];
 					break;
 
 			}

@@ -224,7 +224,7 @@ $(function() {
 			var pJ = note ? (note[1] ? note[1] : '未平定') : '未平定';
 			if (/^p\d+\*\d*\.*\d+[hd]$/.test(pJ) === false) pJ = '未平定';
 			var score = note ? (note[2] ? note[2] : '无') : '无';
-			if (/^\d+$/.test(score) != true) score = '未评分';
+			if (/^\d+$/.test(score) != true) score = '';
 			var pause = note ? (note[3] ? note[3] : '无') : '无';
 			if (!/^\d+[hd]$/.test(pause)) pause = '无';
 

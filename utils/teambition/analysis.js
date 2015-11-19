@@ -74,6 +74,7 @@ var searchPersonTasks = function(person, obj) {
 							taskObj.isEnd = task.isEnd;
 							taskObj.priority = task.priority;
 							taskObj.executor = person;
+							taskObj.comment = task.note.comment;
 							result.tasks.push(taskObj);
 						} else {
 							//旧数据格式
@@ -102,6 +103,7 @@ var searchPersonTasks = function(person, obj) {
 							taskObj.isEnd = task.isEnd;
 							taskObj.priority = task.priority;
 							taskObj.executor = person;
+							taskObj.comment = task.note.comment;
 							result.tasks.push(taskObj);
 
 						}
@@ -152,6 +154,7 @@ var analyze = function(person, obj) {
 							taskObj.created = task.created;
 							taskObj.dueDate = task.dueDate;
 							taskObj.executor = person;
+							taskObj.comment = task.note.comment;
 							result.tasks.push(taskObj);
 						} else if (person === '未指派') {
 							if (!task.executor) {
@@ -169,6 +172,7 @@ var analyze = function(person, obj) {
 								taskObj.created = task.created;
 								taskObj.dueDate = task.dueDate;
 								taskObj.executor = person;
+								taskObj.comment = task.note.comment;
 								result.tasks.push(taskObj);
 							}
 						}

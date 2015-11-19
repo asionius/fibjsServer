@@ -47,12 +47,12 @@ var refresh = function() {
 					// coroutine.parallel(tasks, function(task) {
 					tasks.forEach(function(task) {
 						var content = {};
-						// try {
-						// 	var note = client.getNoteByTaskId(task._id),
-						// 		content = {};
-						// } catch (e) {
-						// 	return;
-						// }
+						try {
+							var note = client.getNoteByTaskId(task._id);
+
+						} catch (e) {
+							return;
+						}
 
 						var t = content[task.content] = {};
 						t.executor = task.executor ? task.executor.name : "";
@@ -62,7 +62,7 @@ var refresh = function() {
 						t.dueDate = task.dueDate;
 						t.isEnd = task.isDone;
 						t.newnote = task.note;
-						// t.note = note;
+						t.note = note;
 						t.projectid = pId;
 						t.personid = person._id;
 						t.id = task._id;
@@ -88,9 +88,9 @@ var fillTeamBition = function() {
 	if (bigData && (new Date()).getTime() - bigData.created < 1000 * 60 * 60) {
 		return bigData;
 	} else {
-		var data = JSON.parse(fs.readFile('./bigData.json'));
+		bigData = JSON.parse(fs.readFile('./bigData.json'));
 		refresh();
-		return data;
+		return bigData;
 	}
 }
 

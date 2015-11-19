@@ -339,9 +339,13 @@ $(function() {
 		manager();
 	}
 
+	function showLastComment() {
+		alert($(this).html());
+	}
+
 	function fillTable() {
 		$('#table').empty();
-		$('#table').append('<tr id="thead"style="color:blue;"><td class="index">编号</td><td><input type="checkbox" value="紧急" id="hurry">紧急任务<input type="checkbox" value="非常紧急" id="vhurry">非常紧急<input type="checkbox" value="普通" id="normal">普通任务</td><td class="due"><input type="checkbox" value="截止日期" id="due">截止日期</td><td class="executor">负责人</td><td class="project">所属项目</td><td class="pause">暂停备注</td><td class="confirmquestion" value="需求确认" title="需求确认"><input type="checkbox" value="需求确认" id="cq">需求</td><td class="solution" value="解决方案" title="解决方案"><input type="checkbox" value="解决方案" id="sl">解决案</td><td class="product" value="开发"><input type="checkbox" value="开发" id="pd">开发</td><td class="test" value="测试版"><input type="checkbox" value="测试版" id="tt">测试版</td><td class="preview" value="预览版"><input type="checkbox" value="预览版" id="pv">预览版</td><td class="result" value="正式版"><input type="checkbox" value="正式版" id="rs">正式版</td><td class="stage" value="其它阶段"><input type="checkbox" value="其它阶段" id="os">所有阶段</td><td class="relation">干系人</td></tr>');
+		$('#table').append('<tr id="thead"style="color:blue;"><td class="index">编号</td><td><input type="checkbox" value="紧急" id="hurry">紧急任务<input type="checkbox" value="非常紧急" id="vhurry">非常紧急<input type="checkbox" value="普通" id="normal">普通任务</td><td class="due"><input type="checkbox" value="截止日期" id="due">截止日期</td><td class="executor">负责人</td><td class="project">所属项目</td><td class="pause">暂停备注</td><td class="confirmquestion" value="需求确认" title="需求确认"><input type="checkbox" value="需求确认" id="cq">需求</td><td class="solution" value="解决方案" title="解决方案"><input type="checkbox" value="解决方案" id="sl">解决案</td><td class="product" value="开发"><input type="checkbox" value="开发" id="pd">开发</td><td class="test" value="测试版"><input type="checkbox" value="测试版" id="tt">测试版</td><td class="preview" value="预览版"><input type="checkbox" value="预览版" id="pv">预览版</td><td class="result" value="正式版"><input type="checkbox" value="正式版" id="rs">正式版</td><td class="stage" value="其它阶段"><input type="checkbox" value="其它阶段" id="os">所有阶段</td><td class="lastcomment">最后评论</td><td class="relation">干系人</td></tr>');
 
 		for (var task in res) {
 			if (house) {
@@ -387,6 +391,11 @@ $(function() {
 			$('#td' + task + '').append("<td class='preview'>" + preview + "</td>");
 			$('#td' + task + '').append("<td class='result'>" + result + "</td>");
 			$('#td' + task + '').append("<td class='stage'>" + res[task].stage + "</td>");
+			var comment = res[task].comment ? res[task].comment.content : '',
+				commentCreated = res[task].comment ? new Date(res[task].comment.created).format('yyyy-MM-dd hh:mm:ss') : '',
+				who = res[task].comment ? res[task].comment.creator : '';
+			lastComment = comment ? who + ' :' + comment + ' 时间: ' + commentCreated : '';
+			$('#td' + task + '').append("<td class='lastcomment' title='" + lastComment + "'>" + lastComment + "</td>");
 			var relation = parseRelation(res[task].note);
 			$('#td' + task + '').append("<td class='relation' title='" + relation + "'>" + relation + "<button id='relation" + task + "'style='padding-top: 1px; padding-bottom:1px; float: right;'>修改</button></td>");
 		}
@@ -397,6 +406,7 @@ $(function() {
 	getTime();
 	getTask();
 	$('#refresh').click(refresh);
+	$('.lastcomment').dblclick(showLastComment);
 	$('#manager').change(manager);
 	$('td button').click(modifyRelation);
 	$('#hurry').click(clickPriority);
