@@ -92,6 +92,10 @@ app.controller('MainCtrl', function($scope, $http) {
 						} else {
 							wds = Number(wds);
 						}
+						if (!$scope.kpiList.P[personObj.person]) {
+							console.error(personObj.person);
+							continue;
+						}
 						var pj = $scope.kpiList.P[personObj.person].P;
 						if (!pj) {
 							// alert(personObj.person + ' : 备忘中月份顶行写， 示例：10月, 并完善员工p级信息');
