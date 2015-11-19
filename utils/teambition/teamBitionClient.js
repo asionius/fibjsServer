@@ -182,6 +182,15 @@ function client() {
 		return taskDetail;
 	}
 
+	this.getSubtasksByTaskId = function(taskId) {
+		var sTime = (new Date()).getTime().toString();
+		var params = {
+			k: 'GET',
+			url: 'https://www.teambition.com/api/subtasks?_taskId=' + taskId + '&_=' + sTime
+		}
+		var r = http.get(params.url, header);
+		return r.body.readAll().toString();
+	}
 	this.setTaskNote = function(taskId, note) {
 		var params = {
 			k: 'PUT',

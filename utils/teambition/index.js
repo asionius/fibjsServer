@@ -49,11 +49,10 @@ var refresh = function() {
 						var content = {};
 						try {
 							var note = client.getNoteByTaskId(task._id);
-
+							var subTasks = JSON.parse(client.getSubtasksByTaskId(task._id));
 						} catch (e) {
 							return;
 						}
-
 						var t = content[task.content] = {};
 						t.executor = task.executor ? task.executor.name : "";
 						t.priority = task.priority;
@@ -66,6 +65,7 @@ var refresh = function() {
 						t.projectid = pId;
 						t.personid = person._id;
 						t.id = task._id;
+						t.subTasks = subTasks;
 						// if (isEnd) t.isEnd = 'true';
 						ts.push(content);
 					})
@@ -79,7 +79,7 @@ var refresh = function() {
 		}
 		fs.writeFile('./bigData.json', JSON.stringify(result));
 		lruCache.clear();
-		lruCache.set('root', result);
+		lruCache.put('root', result);
 	})
 	return 'refreshing ...';
 }

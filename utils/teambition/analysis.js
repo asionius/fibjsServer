@@ -27,6 +27,44 @@ var parseNote = function(note) {
 	} else return note;
 }
 
+var new_parseNote = function(note) {
+	if (note && note.indexOf('v1.1002') !== -1) {
+
+		function getParentTaskNote(note) {
+			var pNote = [];
+			pNote.push(note.month);
+			pNote.push(note.pJ);
+			pNote.push(note.score);
+			pNote.push(note.pause);
+			return pNote.join('\r\n');
+		}
+
+		var ret = {};
+		note = JSON.parse(note);
+		ret.parentNote = getParentTaskNote(note);
+		if (note.subTasks.length === 0) return ret;
+		else {
+			ret.subTaskNotes = [];
+			note.subTasks.forEach(function(subTask) {
+				var noteInfo = [],
+					tname = subTask.name,
+					executor = subTask.executor;
+				noteInfo.push(subTask.month);
+				noteInfo.push(subTask.pJ);
+				noteInfo.push(subTask.score);
+				noteInfo.push(subTask.pause);
+				ret.subTaskNotes.push({
+					executor: executor,
+					taskname: tname,
+					note: noteInfo.join('\r\n')
+				});
+			});
+			return ret;
+		}
+
+	} else return note;
+}
+
 //查询个人的任务
 var searchPersonTasks = function(person, obj) {
 	var pms = [],
@@ -64,8 +102,8 @@ var searchPersonTasks = function(person, obj) {
 							// 	if (util.isObject(note) && note[person]) task.note.set_note.note = note[person];
 							// };
 							if (task.newnote) {
-								var note = parseNote(task.newnote);
-								if (util.isObject(note) && note[person]) task.newnote = note[person];
+								var note = new_parseNote(task.newnote);
+								if (util.isObject(note)) task.newnote = note.parentNote;
 							};
 							taskObj.updated = task.updated;
 							taskObj.created = task.created;
@@ -83,29 +121,48 @@ var searchPersonTasks = function(person, obj) {
 							// 	if (util.isObject(note) && note[person]) task.note.set_note.note = note[person];
 							// 	else continue;
 							// } else continue;
-							if (task.newnote) {
-								var note = parseNote(task.newnote);
-								if (util.isObject(note) && note[person]) task.newnote = note[person];
-								else continue;
-							} else continue;
-
-							var taskObj = {};
-							taskObj.name = i;
-							taskObj.updated = task.updated;
-							taskObj.created = task.created;
-							taskObj.dueDate = task.dueDate;
-							taskObj.project = project;
-							taskObj.projectid = task.projectid;
-							taskObj.itemid = task.personid;
-							taskObj.id = task.id;
-							taskObj.stage = st;
-							taskObj.note = task.newnote;
-							taskObj.isEnd = task.isEnd;
-							taskObj.priority = task.priority;
-							taskObj.executor = person;
-							taskObj.comment = task.note.comment;
-							result.tasks.push(taskObj);
-
+							if (task.subTasks.length === 0) continue;
+							task.subTasks.forEach(function(subTask) {
+								if (subTask.executor === person) {
+									var taskname = subTask.content,
+										note = new_parseNote(task.newnote);
+									if (!util.isObject(note)) {
+										var taskObj = {};
+										taskObj.name = taskname;
+										taskObj.dueDate = subTask.dueDate;
+										taskObj.project = project;
+										taskObj.projectid = task.projectid;
+										taskObj.itemid = task.personid;
+										taskObj.id = subTask._taskId;
+										taskObj.stage = st;
+										taskObj.note = '';
+										taskObj.isEnd = subTask.isDone;
+										taskObj.priority = task.priority;
+										taskObj.executor = person;
+										taskObj.comment = '';
+										result.tasks.push(taskObj);
+										return;
+									};
+									note.subTaskNotes.forEach(function(subNote) {
+										if (subNote.taskname === taskname && subNote.executor === person) {
+											var taskObj = {};
+											taskObj.name = taskname;
+											taskObj.dueDate = subTask.dueDate;
+											taskObj.project = project;
+											taskObj.projectid = task.projectid;
+											taskObj.itemid = task.personid;
+											taskObj.id = subTask._taskId;
+											taskObj.stage = st;
+											taskObj.note = subNote.note;
+											taskObj.isEnd = subTask.isDone;
+											taskObj.priority = task.priority;
+											taskObj.executor = person;
+											taskObj.comment = '';
+											result.tasks.push(taskObj);
+										}
+									})
+								}
+							});
 						}
 					}
 				}
