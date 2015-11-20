@@ -39,11 +39,26 @@ var new_parseNote = function(note) {
 			return pNote.join('\r\n');
 		}
 
+		function transFromPj(pJ) {
+			if (/^p\d+\*\d*\.*\d+[hd]$/.test(pJ)) {
+				var p = pJ.split('*')[0].split('p')[1],
+					t = pJ.split('*')[1].split(/[hd]/)[0];
+				if (pJ.indexOf('d') !== -1) t *= 8;
+				return (1 << p - 1) * t;
+			}
+			return 0;
+		}
+
+		function convertToPj(sum) {
+			return 'p1*' + sum + 'h';
+		}
+
 		var ret = {};
 		note = JSON.parse(note);
 		ret.parentNote = getParentTaskNote(note);
 		if (note.subTasks.length === 0) return ret;
 		else {
+			var ax = 0;
 			ret.subTaskNotes = [];
 			note.subTasks.forEach(function(subTask) {
 				var noteInfo = [],
@@ -51,6 +66,7 @@ var new_parseNote = function(note) {
 					executor = subTask.executor;
 				noteInfo.push(subTask.month);
 				noteInfo.push(subTask.pJ);
+				ax += transFromPj(subTask.pJ);
 				noteInfo.push(subTask.score);
 				noteInfo.push(subTask.pause);
 				ret.subTaskNotes.push({
@@ -59,6 +75,8 @@ var new_parseNote = function(note) {
 					note: noteInfo.join('\r\n')
 				});
 			});
+			note.pJ = convertToPj(transFromPj(note.pJ) - ax);
+			ret.parentNote = getParentTaskNote(note);
 			return ret;
 		}
 
@@ -114,56 +132,43 @@ var searchPersonTasks = function(person, obj) {
 							taskObj.executor = person;
 							taskObj.comment = task.note.comment;
 							result.tasks.push(taskObj);
-						} else {
-							//旧数据格式
-							// if (task.note.set_note) {
-							// 	var note = parseNote(task.note.set_note.note);
-							// 	if (util.isObject(note) && note[person]) task.note.set_note.note = note[person];
-							// 	else continue;
-							// } else continue;
-							if (task.subTasks.length === 0) continue;
-							task.subTasks.forEach(function(subTask) {
-								if (subTask.executor === person) {
-									var taskname = subTask.content,
-										note = new_parseNote(task.newnote);
-									if (!util.isObject(note)) {
-										var taskObj = {};
-										taskObj.name = taskname;
-										taskObj.dueDate = subTask.dueDate;
-										taskObj.project = project;
-										taskObj.projectid = task.projectid;
-										taskObj.itemid = task.personid;
-										taskObj.id = subTask._taskId;
-										taskObj.stage = st;
-										taskObj.note = '';
-										taskObj.isEnd = subTask.isDone;
-										taskObj.priority = task.priority;
-										taskObj.executor = person;
-										taskObj.comment = '';
-										result.tasks.push(taskObj);
-										return;
-									};
-									note.subTaskNotes.forEach(function(subNote) {
-										if (subNote.taskname === taskname && subNote.executor === person) {
-											var taskObj = {};
-											taskObj.name = taskname;
-											taskObj.dueDate = subTask.dueDate;
-											taskObj.project = project;
-											taskObj.projectid = task.projectid;
-											taskObj.itemid = task.personid;
-											taskObj.id = subTask._taskId;
-											taskObj.stage = st;
-											taskObj.note = subNote.note;
-											taskObj.isEnd = subTask.isDone;
-											taskObj.priority = task.priority;
-											taskObj.executor = person;
-											taskObj.comment = '';
-											result.tasks.push(taskObj);
-										}
-									})
-								}
-							});
 						}
+						//旧数据格式
+						// if (task.note.set_note) {
+						// 	var note = parseNote(task.note.set_note.note);
+						// 	if (util.isObject(note) && note[person]) task.note.set_note.note = note[person];
+						// 	else continue;
+						// } else continue;
+						// 子任务
+						if (task.subTasks.length === 0) continue;
+						task.subTasks.forEach(function(subTask) {
+							if (subTask.executor && subTask.executor.name === person) {
+								var taskname = subTask.content;
+								var taskObj = {};
+								taskObj.name = taskname;
+								taskObj.dueDate = subTask.dueDate;
+								taskObj.project = project;
+								taskObj.projectid = task.projectid;
+								taskObj.itemid = task.personid;
+								taskObj.id = subTask._taskId;
+								taskObj.stage = st;
+								taskObj.isEnd = subTask.isDone;
+								taskObj.priority = task.priority;
+								taskObj.executor = person;
+								taskObj.comment = '';
+								if (!util.isObject(note)) {
+									taskObj.note = '';
+									result.tasks.push(taskObj);
+									return;
+								};
+								note.subTaskNotes.forEach(function(subNote) {
+									if (subNote.taskname === taskname && subNote.executor === person) {
+										taskObj.note = subNote.note;
+										result.tasks.push(taskObj);
+									}
+								})
+							}
+						});
 					}
 				}
 			})
@@ -212,6 +217,7 @@ var analyze = function(person, obj) {
 							taskObj.dueDate = task.dueDate;
 							taskObj.executor = person;
 							taskObj.comment = task.note.comment;
+							taskObj.subTasks = task.subTasks;
 							result.tasks.push(taskObj);
 						} else if (person === '未指派') {
 							if (!task.executor) {
@@ -230,6 +236,7 @@ var analyze = function(person, obj) {
 								taskObj.dueDate = task.dueDate;
 								taskObj.executor = person;
 								taskObj.comment = task.note.comment;
+								taskObj.subTasks = task.subTasks;
 								result.tasks.push(taskObj);
 							}
 						}
@@ -256,7 +263,7 @@ var sortTasks = function(info) {
 var performance = function(P, partment, name, obj, M) {
 	var infos = [];
 	partment[name].forEach(function(person) {
-		var personObj = analyze(person, obj);
+		var personObj = searchPersonTasks(person, obj);
 		infos.push(personObj);
 
 	});
