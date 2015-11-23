@@ -105,7 +105,8 @@ var searchPersonTasks = function(person, obj) {
 				for (var t in stage) {
 					var tasks = stage[t];
 					for (var i in tasks) {
-						var task = tasks[i];
+						var task = tasks[i],
+							note;
 						if (task.executor === person) {
 							var taskObj = {};
 							taskObj.name = i;
@@ -120,7 +121,7 @@ var searchPersonTasks = function(person, obj) {
 							// 	if (util.isObject(note) && note[person]) task.note.set_note.note = note[person];
 							// };
 							if (task.newnote) {
-								var note = new_parseNote(task.newnote);
+								note = new_parseNote(task.newnote);
 								if (util.isObject(note)) task.newnote = note.parentNote;
 							};
 							taskObj.updated = task.updated;
@@ -143,6 +144,7 @@ var searchPersonTasks = function(person, obj) {
 						if (task.subTasks.length === 0) continue;
 						task.subTasks.forEach(function(subTask) {
 							if (subTask.executor && subTask.executor.name === person) {
+								if (task.newnote) note = note ? note : new_parseNote(task.newnote);
 								var taskname = subTask.content;
 								var taskObj = {};
 								taskObj.name = taskname;
