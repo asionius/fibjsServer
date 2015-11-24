@@ -105,7 +105,7 @@ $(function() {
 		for (var i = 1; i < len; i++) {
 			lines.eq(i).find('td').eq(2).removeClass('warn');
 			var j = Number(i) - 1;
-			$('#td' + j + '').removeClass('warn2');
+			$('#td' + j + '').find('td').eq(1).removeClass('warn2');
 
 			var due = $('#td' + j + '').find('td').eq(2).html();
 			if (due) {
@@ -114,7 +114,7 @@ $(function() {
 
 			if (d.getHours() == 17 && d.getMinutes() > 30) {
 				if (new Date().getTime() - new Date(res[j].updated).getTime() > 1000 * 60 * 60 * 12) {
-					$('#td' + j + '').addClass('warn2');
+					$('#td' + j + '').find('td').eq(1).addClass('warn2');
 				}
 			}
 			if (d.getHours() > 19 && d.getHours() < 21) {
